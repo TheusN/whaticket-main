@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: whaticket-postgres-local
+    restart: always
+    environment:
+      POSTGRES_DB: whaticket_local
+      POSTGRES_USER: whaticket_local
+      POSTGRES_PASSWORD: whaticket123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+    container_name: whaticket-redis-local
+    restart: always
+    command: redis-server --requirepass redis123
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
