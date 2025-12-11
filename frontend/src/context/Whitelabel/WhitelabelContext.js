@@ -31,8 +31,8 @@ export const WhitelabelProvider = ({ children }) => {
   const fetchWhitelabel = async () => {
     setLoading(true);
     try {
-      // Tenta buscar whitelabel do backend
-      const { data } = await api.get("/whitelabel");
+      // Usa rota pública que não precisa de autenticação
+      const { data } = await api.get("/whitelabel/public");
       if (data) {
         setWhitelabel({ ...defaultWhitelabel, ...data });
 
@@ -47,7 +47,8 @@ export const WhitelabelProvider = ({ children }) => {
         }
       }
     } catch (error) {
-      // Usa configura��es padr�o se n�o encontrar whitelabel
+      // Usa configurações padrão se não encontrar whitelabel
+      console.log("Whitelabel not found, using defaults");
       setWhitelabel(defaultWhitelabel);
     } finally {
       setLoading(false);

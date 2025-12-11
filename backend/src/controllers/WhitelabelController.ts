@@ -71,6 +71,26 @@ export const showByCompany = async (req: Request, res: Response): Promise<Respon
   }
 };
 
+// Rota pública para obter whitelabel (sem autenticação) - usada na tela de login
+export const showPublic = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    // Sempre retorna o whitelabel da company 1 (principal)
+    const whitelabel = await ShowWhitelabelService(1);
+
+    if (!whitelabel) {
+      return res.status(200).json(null);
+    }
+
+    return res.status(200).json(whitelabel);
+  } catch (error) {
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    console.error("WhitelabelController showPublic error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export const update = async (req: Request, res: Response): Promise<Response> => {
   const { companyId } = req.user;
   const whitelabelData = req.body;

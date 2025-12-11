@@ -50,6 +50,8 @@ const upload = multer({
 });
 
 // Rotas
+// Rota pública para obter configurações de whitelabel (usada antes do login)
+whitelabelRoutes.get("/whitelabel/public", WhitelabelController.showPublic);
 whitelabelRoutes.post("/whitelabel", isAuth, WhitelabelController.store);
 whitelabelRoutes.get("/whitelabel", isAuth, WhitelabelController.show);
 whitelabelRoutes.get("/whitelabel/:companyId", WhitelabelController.showByCompany);
