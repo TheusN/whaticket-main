@@ -1,5 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Link as RouterLink } from "react-router-dom";
+import packageJson from "../../../package.json";
 
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -11,14 +12,14 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import InputAdornment from "@material-ui/core/InputAdornment";
-import { versionSystem } from "../../../package.json";
 import { i18n } from "../../translate/i18n";
-import { nomeEmpresa } from "../../../package.json";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import logo from "../../assets/logo.png";
 import { LanguageOutlined, Visibility, VisibilityOff } from "@material-ui/icons";
 import { IconButton, Menu, MenuItem } from "@material-ui/core";
 import LanguageControl from "../../components/LanguageControl";
+
+const { versionSystem, nomeEmpresa } = packageJson;
 
 
 const Copyright = () => {

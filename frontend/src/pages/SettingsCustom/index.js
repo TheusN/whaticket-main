@@ -21,6 +21,7 @@ import useAuth from "../../hooks/useAuth.js";
 import useSettings from "../../hooks/useSettings";
 
 import OnlyForSuperUser from "../../components/OnlyForSuperUser";
+import OnlyForCompanyOne from "../../components/OnlyForCompanyOne";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -74,7 +75,23 @@ const SettingsCustom = () => {
     async function findData() {
       setLoading(true);
       try {
+        // Carrega dados do usuário do localStorage
+        const userId = localStorage.getItem("userId");
         const companyId = localStorage.getItem("companyId");
+        const profile = localStorage.getItem("profile");
+
+        // Cria objeto de usuário básico para WhiteLabel
+        const basicUser = {
+          id: parseInt(userId),
+          companyId: parseInt(companyId),
+          profile: profile,
+          super: profile === "admin" && companyId === "1"
+        };
+
+        console.log("✅ USER FROM LOCALSTORAGE:", basicUser);
+        setCurrentUser(basicUser);
+
+        // Carrega dados da empresa
         const company = await find(companyId);
         const settingList = await getAllSettings();
         setCompany(company);
@@ -90,9 +107,15 @@ const SettingsCustom = () => {
           }
         }
 
-        const user = await getCurrentUserInfo();
-        setCurrentUser(user);
+        // Tenta pegar dados completos do usuário (não bloqueante)
+        try {
+          const fullUser = await getCurrentUserInfo();
+          setCurrentUser(fullUser);
+        } catch (e) {
+          console.warn("Não foi possível carregar dados completos do usuário, usando localStorage");
+        }
       } catch (e) {
+        console.error("❌ ERRO ao carregar dados:", e);
         toast.error(e);
       }
       setLoading(false);
@@ -147,8 +170,19 @@ const SettingsCustom = () => {
   };
 
   const isSuper = () => {
-    return currentUser.super;
+    return currentUser && currentUser.super === true;
   };
+
+  const isCompanyOne = () => {
+    return currentUser && (currentUser.companyId === 1 || currentUser.companyId === "1");
+  };
+
+  console.log("=== RENDER DEBUG ===");
+  console.log("currentUser:", currentUser);
+  console.log("isSuper():", isSuper());
+  console.log("isCompanyOne():", isCompanyOne());
+  console.log("tab:", tab);
+  console.log("===================");
 
   return (
     <MainContainer className={classes.root}>
@@ -170,7 +204,7 @@ const SettingsCustom = () => {
           {isSuper() ? <Tab label={i18n.t("settings.tabs.companies")} value={"companies"} /> : null}
           {isSuper() ? <Tab label={i18n.t("settings.tabs.plans")} value={"plans"} /> : null}
           {isSuper() ? <Tab label={i18n.t("settings.tabs.helps")} value={"helps"} /> : null}
-          {currentUser.companyId === 1 ? <Tab label="WhiteLabel" value={"whitelabel"} /> : null}
+          {isCompanyOne() ? <Tab label="WhiteLabel" value={"whitelabel"} /> : null}
         </Tabs>
         <Paper className={classes.paper} elevation={0}>
           <TabPanel
@@ -228,15 +262,18 @@ const SettingsCustom = () => {
               }
             />
           </TabPanel>
-          {currentUser.companyId === 1 && (
-            <TabPanel
-              className={classes.container}
-              value={tab}
-              name={"whitelabel"}
-            >
-              <WhitelabelManager />
-            </TabPanel>
-          )}
+          <OnlyForCompanyOne
+            user={currentUser}
+            yes={() => (
+              <TabPanel
+                className={classes.container}
+                value={tab}
+                name={"whitelabel"}
+              >
+                <WhitelabelManager />
+              </TabPanel>
+            )}
+          />
         </Paper>
       </Paper>
     </MainContainer>
