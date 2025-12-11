@@ -13,7 +13,6 @@ class ManagedSocket {
       if (!this.rawSocket.recovered) {
         const refreshJoinsOnReady = () => {
           for (const j of this.joins) {
-            console.debug("refreshing join", j);
             this.rawSocket.emit(`join${j.event}`, ...j.params);
           }
           this.rawSocket.off("ready", refreshJoinsOnReady);
@@ -45,7 +44,6 @@ class ManagedSocket {
   emit(event, ...params) {
     if (event.startsWith("join")) {
       this.joins.push({ event: event.substring(4), params });
-      console.log("Joining", { event: event.substring(4), params});
     }
     return this.rawSocket.emit(event, ...params);
   }
@@ -138,12 +136,8 @@ const SocketManager = {
         }        
       });
       
-      this.currentSocket.on("connect", (...params) => {
-        console.warn("socket connected", params);
-      })
-      
-      this.currentSocket.onAny((event, ...args) => {
-        console.debug("Event: ", { socket: this.currentSocket, event, args });
+      this.currentSocket.on("connect", () => {
+        // Socket connected
       });
       
       this.onReady(() => {

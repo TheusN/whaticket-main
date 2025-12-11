@@ -1,7 +1,50 @@
 // Theme configuration - Redesign 2025
 // Nova identidade visual com Poppins, OLED dark mode e palette moderna
 
-export const getDesignTokens = (mode) => ({
+// Função para ajustar luminosidade de uma cor hex
+const adjustColor = (hex, percent) => {
+  // Remove o # se existir
+  hex = hex.replace(/^#/, '');
+
+  // Parse RGB
+  let r = parseInt(hex.substring(0, 2), 16);
+  let g = parseInt(hex.substring(2, 4), 16);
+  let b = parseInt(hex.substring(4, 6), 16);
+
+  // Ajusta luminosidade
+  r = Math.min(255, Math.max(0, r + (r * percent / 100)));
+  g = Math.min(255, Math.max(0, g + (g * percent / 100)));
+  b = Math.min(255, Math.max(0, b + (b * percent / 100)));
+
+  // Converte de volta para hex
+  const toHex = (n) => Math.round(n).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
+// Cores padrão (fallback se whitelabel não existir)
+const defaultColors = {
+  primaryColorLight: "#8B5CF6",
+  primaryColorDark: "#8B5CF6",
+  secondaryColorLight: "#F3F4F6",
+  secondaryColorDark: "#1F2937",
+  backgroundColorLight: "#FFFFFF",
+  backgroundColorDark: "#000000",
+  textColorLight: "#1F2937",
+  textColorDark: "#F9FAFB",
+};
+
+export const getDesignTokens = (mode, whitelabelColors = null) => {
+  // Usar cores do whitelabel se disponíveis, senão usar padrão
+  const colors = whitelabelColors || defaultColors;
+
+  const primaryMain = mode === "light"
+    ? (colors.primaryColorLight || defaultColors.primaryColorLight)
+    : (colors.primaryColorDark || defaultColors.primaryColorDark);
+
+  const primaryLight = adjustColor(primaryMain, 20);
+  const primaryDark = adjustColor(primaryMain, -20);
+
+  return ({
     // Typography - Poppins universal
     typography: {
         fontFamily: [
@@ -104,7 +147,7 @@ export const getDesignTokens = (mode) => ({
         },
         "&::-webkit-scrollbar-thumb": {
             boxShadow: 'inset 0 0 6px rgba(0, 0, 0, 0.3)',
-            backgroundColor: "#8B5CF6",
+            backgroundColor: primaryMain,
             borderRadius: '4px',
         },
         "&::-webkit-scrollbar-track": {
@@ -129,11 +172,11 @@ export const getDesignTokens = (mode) => ({
     palette: {
         type: mode,
 
-        // Primary - Roxo moderno (#8B5CF6)
+        // Primary - Cor dinâmica do whitelabel
         primary: {
-            main: "#8B5CF6",
-            light: "#A78BFA",
-            dark: "#7C3AED",
+            main: primaryMain,
+            light: primaryLight,
+            dark: primaryDark,
             contrastText: "#FFFFFF",
         },
 
@@ -189,8 +232,8 @@ export const getDesignTokens = (mode) => ({
         divider: mode === "light" ? "#E5E5E5" : "#1A1A1A",
 
         // Custom colors (compatibilidade)
-        textPrimary: mode === "light" ? "#8B5CF6" : "#FAFAFA",
-        borderPrimary: mode === "light" ? "#8B5CF6" : "#FAFAFA",
+        textPrimary: mode === "light" ? primaryMain : "#FAFAFA",
+        borderPrimary: mode === "light" ? primaryMain : "#FAFAFA",
         dark: { main: mode === "light" ? "#171717" : "#FAFAFA" },
         light: { main: mode === "light" ? "#FAFAFA" : "#171717" },
 
@@ -222,7 +265,7 @@ export const getDesignTokens = (mode) => ({
         messageIcons: mode === "light" ? "#737373" : "#A3A3A3",
         inputBackground: mode === "light" ? "#FFFFFF" : "#141414",
         barraSuperior: mode === "light"
-            ? "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)"
+            ? `linear-gradient(135deg, ${primaryMain} 0%, ${adjustColor(primaryMain, -10)} 100%)`
             : "#0A0A0A",
         boxticket: mode === "light" ? "#F5F5F5" : "#141414",
         campaigntab: mode === "light" ? "#F5F5F5" : "#141414",
@@ -323,7 +366,7 @@ export const getDesignTokens = (mode) => ({
                 },
                 // ♿ ACESSIBILIDADE: Focus visible para navegação por teclado
                 '*:focus-visible': {
-                    outline: `3px solid ${mode === "light" ? "#8B5CF6" : "#A78BFA"}`,
+                    outline: `3px solid ${mode === "light" ? primaryMain : primaryLight}`,
                     outlineOffset: '2px',
                     borderRadius: '4px',
                 },
@@ -337,7 +380,7 @@ export const getDesignTokens = (mode) => ({
                     left: '-9999px',
                     zIndex: 999,
                     padding: '1em',
-                    backgroundColor: mode === "light" ? "#8B5CF6" : "#A78BFA",
+                    backgroundColor: mode === "light" ? primaryMain : primaryLight,
                     color: '#FFFFFF',
                     textDecoration: 'none',
                     borderRadius: '0 0 4px 0',
@@ -367,7 +410,7 @@ export const getDesignTokens = (mode) => ({
                 minWidth: '48px',
                 // ♿ ACESSIBILIDADE: Focus visible customizado
                 '&:focus-visible': {
-                    outline: `3px solid ${mode === "light" ? "#8B5CF6" : "#A78BFA"}`,
+                    outline: `3px solid ${mode === "light" ? primaryMain : primaryLight}`,
                     outlineOffset: '2px',
                 },
             },
@@ -392,7 +435,7 @@ export const getDesignTokens = (mode) => ({
             root: {
                 padding: '12px', // Garante 48x48px
                 '&:focus-visible': {
-                    outline: `3px solid ${mode === "light" ? "#8B5CF6" : "#A78BFA"}`,
+                    outline: `3px solid ${mode === "light" ? primaryMain : primaryLight}`,
                     outlineOffset: '2px',
                     borderRadius: '50%',
                 },
@@ -413,7 +456,7 @@ export const getDesignTokens = (mode) => ({
                     // ♿ ACESSIBILIDADE: Focus visible em inputs
                     '&.Mui-focused': {
                         '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: mode === "light" ? "#8B5CF6" : "#A78BFA",
+                            borderColor: mode === "light" ? primaryMain : primaryLight,
                             borderWidth: '2px',
                         },
                     },
@@ -421,7 +464,7 @@ export const getDesignTokens = (mode) => ({
                 // ♿ ACESSIBILIDADE: Labels sempre visíveis para screen readers
                 '& .MuiInputLabel-outlined': {
                     '&.Mui-focused': {
-                        color: mode === "light" ? "#8B5CF6" : "#A78BFA",
+                        color: mode === "light" ? primaryMain : primaryLight,
                     },
                 },
             },
@@ -429,13 +472,13 @@ export const getDesignTokens = (mode) => ({
         // ♿ ACESSIBILIDADE: Links com contraste adequado
         MuiLink: {
             root: {
-                color: mode === "light" ? "#7C3AED" : "#A78BFA",
-                textDecorationColor: mode === "light" ? "#7C3AED" : "#A78BFA",
+                color: mode === "light" ? primaryDark : primaryLight,
+                textDecorationColor: mode === "light" ? primaryDark : primaryLight,
                 '&:hover': {
-                    color: mode === "light" ? "#6D28D9" : "#C4B5FD",
+                    color: mode === "light" ? adjustColor(primaryDark, -10) : adjustColor(primaryLight, 15),
                 },
                 '&:focus-visible': {
-                    outline: `3px solid ${mode === "light" ? "#8B5CF6" : "#A78BFA"}`,
+                    outline: `3px solid ${mode === "light" ? primaryMain : primaryLight}`,
                     outlineOffset: '2px',
                     borderRadius: '2px',
                 },
@@ -447,6 +490,7 @@ export const getDesignTokens = (mode) => ({
             },
         },
     },
-});
+  });
+};
 
 export default getDesignTokens;

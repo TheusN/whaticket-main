@@ -88,7 +88,7 @@ const SettingsCustom = () => {
           super: profile === "admin" && companyId === "1"
         };
 
-        console.log("✅ USER FROM LOCALSTORAGE:", basicUser);
+        // User loaded from localStorage
         setCurrentUser(basicUser);
 
         // Carrega dados da empresa
@@ -112,10 +112,9 @@ const SettingsCustom = () => {
           const fullUser = await getCurrentUserInfo();
           setCurrentUser(fullUser);
         } catch (e) {
-          console.warn("Não foi possível carregar dados completos do usuário, usando localStorage");
+          // Using localStorage data as fallback
         }
       } catch (e) {
-        console.error("❌ ERRO ao carregar dados:", e);
         toast.error(e);
       }
       setLoading(false);
@@ -176,13 +175,6 @@ const SettingsCustom = () => {
   const isCompanyOne = () => {
     return currentUser && (currentUser.companyId === 1 || currentUser.companyId === "1");
   };
-
-  console.log("=== RENDER DEBUG ===");
-  console.log("currentUser:", currentUser);
-  console.log("isSuper():", isSuper());
-  console.log("isCompanyOne():", isCompanyOne());
-  console.log("tab:", tab);
-  console.log("===================");
 
   return (
     <MainContainer className={classes.root}>

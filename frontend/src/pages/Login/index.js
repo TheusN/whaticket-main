@@ -14,8 +14,9 @@ import Container from "@material-ui/core/Container";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import logo from "../../assets/logo.png";
+import logoDefault from "../../assets/logo.png";
 import { LanguageOutlined, Visibility, VisibilityOff } from "@material-ui/icons";
+import { useWhitelabelContext } from "../../context/Whitelabel/WhitelabelContext";
 import { IconButton, Menu, MenuItem } from "@material-ui/core";
 import LanguageControl from "../../components/LanguageControl";
 
@@ -93,6 +94,18 @@ const Login = () => {
 	const [menuLanguageOpen, setMenuLanguageOpen] = useState(false);
 
 	const { handleLogin } = useContext(AuthContext);
+	const { whitelabel } = useWhitelabelContext();
+
+	// Usar logo do whitelabel (loginLogo ou logoLight) ou padrão
+	const loginLogo = React.useMemo(() => {
+		if (whitelabel?.loginLogo) {
+			return `${process.env.REACT_APP_BACKEND_URL}${whitelabel.loginLogo}`;
+		}
+		if (whitelabel?.logoLight) {
+			return `${process.env.REACT_APP_BACKEND_URL}${whitelabel.logoLight}`;
+		}
+		return logoDefault;
+	}, [whitelabel]);
 
 	const handleChangeInput = e => {
 		setUser({ ...user, [e.target.name]: e.target.value });
@@ -155,7 +168,7 @@ const Login = () => {
 			<CssBaseline/>
 			<div className={classes.paper}>
 				<div>
-					<img style={{ margin: "0 auto", width: "70%" }} src={logo} alt="Whats" />
+					<img style={{ margin: "0 auto", width: "70%" }} src={loginLogo} alt={whitelabel?.companyName || "Atendechat"} />
 				</div>
 				{/*<Typography component="h1" variant="h5">
 					{i18n.t("login.title")}

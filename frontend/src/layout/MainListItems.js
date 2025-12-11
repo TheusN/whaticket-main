@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useContext, useEffect, useReducer, useState, useRef } from "react";
 import { Link as RouterLink, useHistory } from "react-router-dom";
 
 import ListItem from "@material-ui/core/ListItem";
@@ -28,6 +28,11 @@ import AnnouncementIcon from "@material-ui/icons/AnnouncementOutlined";
 import ForumIcon from "@material-ui/icons/ForumOutlined";
 import LocalAtmIcon from '@material-ui/icons/LocalAtmOutlined';
 import RotateRight from "@material-ui/icons/RotateRight";
+import MoveToInboxIcon from "@material-ui/icons/MoveToInbox";
+import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import SearchIcon from "@material-ui/icons/Search";
+import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty";
+import AssignmentIndIcon from "@material-ui/icons/AssignmentInd";
 import { i18n } from "../translate/i18n";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
 import { AuthContext } from "../context/Auth/AuthContext";
@@ -45,6 +50,7 @@ import { AllInclusive, AttachFileOutlined, BlurCircular, DeviceHubOutlined, Sche
 import usePlans from "../hooks/usePlans";
 import Typography from "@material-ui/core/Typography";
 import useVersion from "../hooks/useVersion";
+import { useTicketsFilter } from "../context/Tickets/TicketsFilterContext";
 
 const useStyles = makeStyles((theme) => ({
   ListSubheader: {
@@ -192,6 +198,9 @@ const MainListItems = (props) => {
   const [showInternalChat, setShowInternalChat] = useState(false);
   const [showExternalApi, setShowExternalApi] = useState(false);
 
+  // Filtros de tickets do contexto
+  const { ticketFilter, setTicketFilter, ticketSubFilter, setTicketSubFilter } = useTicketsFilter();
+
   // Detecta qual seção está ativa baseado na rota
   const getCurrentSection = () => {
     const path = location.pathname;
@@ -218,11 +227,21 @@ const MainListItems = (props) => {
   const { getVersion } = useVersion();
 
   const socketManager = useContext(SocketContext);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     async function fetchVersion() {
       const _version = await getVersion();
-      setVersion(_version.version);
+      if (isMountedRef.current) {
+        setVersion(_version.version);
+      }
     }
     fetchVersion();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -239,13 +258,15 @@ const MainListItems = (props) => {
       const companyId = user.companyId;
       const planConfigs = await getPlanCompany(undefined, companyId);
 
-      setShowCampaigns(planConfigs.plan.useCampaigns);
-      setShowKanban(planConfigs.plan.useKanban);
-      setShowOpenAi(planConfigs.plan.useOpenAi);
-      setShowIntegrations(planConfigs.plan.useIntegrations);
-      setShowSchedules(planConfigs.plan.useSchedules);
-      setShowInternalChat(planConfigs.plan.useInternalChat);
-      setShowExternalApi(planConfigs.plan.useExternalApi);
+      if (isMountedRef.current) {
+        setShowCampaigns(planConfigs.plan.useCampaigns);
+        setShowKanban(planConfigs.plan.useKanban);
+        setShowOpenAi(planConfigs.plan.useOpenAi);
+        setShowIntegrations(planConfigs.plan.useIntegrations);
+        setShowSchedules(planConfigs.plan.useSchedules);
+        setShowInternalChat(planConfigs.plan.useInternalChat);
+        setShowExternalApi(planConfigs.plan.useExternalApi);
+      }
     }
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -329,9 +350,13 @@ const MainListItems = (props) => {
       const { data } = await api.get("/chats/", {
         params: { searchParam, pageNumber },
       });
-      dispatch({ type: "LOAD_CHATS", payload: data.records });
+      if (isMountedRef.current) {
+        dispatch({ type: "LOAD_CHATS", payload: data.records });
+      }
     } catch (err) {
-      toastError(err);
+      if (isMountedRef.current) {
+        toastError(err);
+      }
     }
   };
 
@@ -345,20 +370,112 @@ const MainListItems = (props) => {
       {/* SEÇÃO: ATENDIMENTO */}
       {currentSection === 'atendimento' && (
         <>
-          <ListItemLink
-            to="/tickets"
-            primary={i18n.t("mainDrawer.listItems.tickets")}
-            icon={<WhatsAppIcon />}
-          />
+          <ListSubheader
+            hidden={collapsed}
+            style={{
+              position: "relative",
+              fontSize: "13px",
+              textAlign: "left",
+              paddingLeft: 20,
+              marginTop: 5,
+              marginBottom: 5,
+              color: "inherit",
+              opacity: 0.7
+            }}
+            inset
+            color="inherit">
+            Tickets
+          </ListSubheader>
+
+          <ListItem
+            button
+            dense
+            selected={ticketFilter === "open" && ticketSubFilter === "open"}
+            onClick={() => {
+              setTicketFilter("open");
+              setTicketSubFilter("open");
+              history.push("/tickets");
+            }}
+            className={classes.listItem}
+          >
+            <ListItemIcon className={classes.listItemIcon}>
+              <AssignmentIndIcon />
+            </ListItemIcon>
+            <ListItemText primary={i18n.t("ticketsList.assignedHeader")} className={classes.listItemText} />
+          </ListItem>
+
+          <ListItem
+            button
+            dense
+            selected={ticketFilter === "open" && ticketSubFilter === "pending"}
+            onClick={() => {
+              setTicketFilter("open");
+              setTicketSubFilter("pending");
+              history.push("/tickets");
+            }}
+            className={classes.listItem}
+          >
+            <ListItemIcon className={classes.listItemIcon}>
+              <HourglassEmptyIcon />
+            </ListItemIcon>
+            <ListItemText primary={i18n.t("ticketsList.pendingHeader")} className={classes.listItemText} />
+          </ListItem>
+
+          <ListItem
+            button
+            dense
+            selected={ticketFilter === "closed"}
+            onClick={() => {
+              setTicketFilter("closed");
+              history.push("/tickets");
+            }}
+            className={classes.listItem}
+          >
+            <ListItemIcon className={classes.listItemIcon}>
+              <CheckBoxIcon />
+            </ListItemIcon>
+            <ListItemText primary={i18n.t("tickets.tabs.closed.title")} className={classes.listItemText} />
+          </ListItem>
+
+          <ListItem
+            button
+            dense
+            selected={ticketFilter === "search"}
+            onClick={() => {
+              setTicketFilter("search");
+              history.push("/tickets");
+            }}
+            className={classes.listItem}
+          >
+            <ListItemIcon className={classes.listItemIcon}>
+              <SearchIcon />
+            </ListItemIcon>
+            <ListItemText primary={i18n.t("tickets.tabs.search.title")} className={classes.listItemText} />
+          </ListItem>
+
+          <Divider style={{ margin: "10px 0" }} />
+
+          <ListSubheader
+            hidden={collapsed}
+            style={{
+              position: "relative",
+              fontSize: "13px",
+              textAlign: "left",
+              paddingLeft: 20,
+              marginTop: 5,
+              marginBottom: 5,
+              color: "inherit",
+              opacity: 0.7
+            }}
+            inset
+            color="inherit">
+            Ferramentas
+          </ListSubheader>
+
           <ListItemLink
             to="/quick-messages"
             primary={i18n.t("mainDrawer.listItems.quickMessages")}
             icon={<FlashOnIcon />}
-          />
-          <ListItemLink
-            to="/todolist"
-            primary={i18n.t("mainDrawer.listItems.tasks")}
-            icon={<BorderColorIcon />}
           />
           <ListItemLink
             to="/contacts"
@@ -376,10 +493,15 @@ const MainListItems = (props) => {
             icon={<LocalOfferIcon />}
           />
           <ListItemLink
+            to="/todolist"
+            primary={i18n.t("mainDrawer.listItems.tasks")}
+            icon={<BorderColorIcon />}
+          />
+          <ListItemLink
             to="/chats"
             primary={i18n.t("mainDrawer.listItems.chats")}
             icon={
-              <Badge color="secondary" variant="dot" invisible={invisible}>
+              <Badge color="secondary" variant="dot" overlap="circular" invisible={invisible}>
                 <ForumIcon />
               </Badge>
             }
@@ -548,7 +670,7 @@ const MainListItems = (props) => {
                 to="/connections"
                 primary={i18n.t("mainDrawer.listItems.connections")}
                 icon={
-                  <Badge badgeContent={connectionWarning ? "!" : 0} color="error">
+                  <Badge badgeContent={connectionWarning ? "!" : 0} color="error" overlap="rectangular">
                     <SyncAltIcon />
                   </Badge>
                 }

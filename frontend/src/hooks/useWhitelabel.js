@@ -16,11 +16,10 @@ const useWhitelabel = () => {
       const { data } = await api.get("/whitelabel");
       setWhitelabel(data);
     } catch (error) {
-      console.log("No whitelabel found or error:", error);
-      // Não mostrar erro se whitelabel não existe ainda
-      if (error?.response?.status !== 404) {
-        toast.error("Erro ao carregar configurações de WhiteLabel");
-      }
+      // Silenciosamente ignora erros - whitelabel é opcional
+      // Erro 404: não existe ainda
+      // Erro 500: tabela pode não existir (migration pendente)
+      setWhitelabel(null);
     } finally {
       setLoading(false);
     }

@@ -1,19 +1,17 @@
 import React, { useState, useContext, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import clsx from "clsx";
-import moment from "moment";
 import {
   makeStyles,
   Drawer,
   AppBar,
   Toolbar,
   List,
-  Typography,
   Divider,
   MenuItem,
   IconButton,
   Menu,
   useTheme,
-  useMediaQuery,
 } from "@material-ui/core";
 
 import MenuIcon from "@material-ui/icons/Menu";
@@ -33,11 +31,11 @@ import toastError from "../errors/toastError";
 import AnnouncementsPopover from "../components/AnnouncementsPopover";
 import TopNavigationBar from "../components/TopNavigationBar";
 
-import logo from "../assets/logo.png";
+import logoDefault from "../assets/logo.png";
 import { SocketContext } from "../context/Socket/SocketContext";
+import { useWhitelabelContext } from "../context/Whitelabel/WhitelabelContext";
 import ChatPopover from "../pages/Chat/ChatPopover";
 
-import { useDate } from "../hooks/useDate";
 
 import ColorModeContext from "../layout/themeContext";
 import Brightness4Icon from '@material-ui/icons/Brightness4';
@@ -47,10 +45,12 @@ import { LanguageOutlined } from "@material-ui/icons";
 import SkipNavigation from "../components/SkipNavigation";
 
 const drawerWidth = 240;
+const appBarHeight = 64;
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
+    flexDirection: "column",
     height: "100vh",
     [theme.breakpoints.down("sm")]: {
       height: "calc(100vh - 56px)",
@@ -58,9 +58,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.fancyBackground,
     '& .MuiButton-outlinedPrimary': {
       color: theme.mode === 'light' ? '#FFF' : '#FFF',
-	  //backgroundColor: theme.mode === 'light' ? '#682ee2' : '#682ee2',
-	backgroundColor: theme.mode === 'light' ? theme.palette.primary.main : '#1c1c1c',
-      //border: theme.mode === 'light' ? '1px solid rgba(0 124 102)' : '1px solid rgba(255, 255, 255, 0.5)',
+      backgroundColor: theme.mode === 'light' ? theme.palette.primary.main : '#1c1c1c',
     },
     '& .MuiTab-textColorPrimary.Mui-selected': {
       color: theme.mode === 'light' ? 'Primary' : '#FFF',
@@ -70,40 +68,18 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
   },
   toolbar: {
-    paddingRight: 24, // keep right padding when drawer closed
+    paddingRight: 24,
+    paddingLeft: 16,
     color: theme.palette.dark.main,
     background: theme.palette.barraSuperior,
-  },
-  toolbarIcon: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "0 8px",
-    minHeight: "48px",
-    [theme.breakpoints.down("sm")]: {
-      height: "48px"
-    }
+    minHeight: appBarHeight,
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
-    transition: theme.transitions.create(["width", "margin"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  appBarShift: {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(["width", "margin"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    [theme.breakpoints.down("sm")]: {
-      display: "none"
-    }
+    width: "100%",
   },
   menuButton: {
-    marginRight: 36,
+    marginRight: 16,
   },
   menuButtonHidden: {
     display: "none",
@@ -113,10 +89,27 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 14,
     color: "white",
   },
+  logo: {
+    height: 40,
+    width: "auto",
+    marginRight: theme.spacing(2),
+    [theme.breakpoints.down("sm")]: {
+      height: 32,
+    },
+  },
+  // Container abaixo do AppBar
+  mainContainer: {
+    display: "flex",
+    flex: 1,
+    overflow: "hidden",
+    marginTop: appBarHeight,
+  },
+  // Drawer (menu lateral)
   drawerPaper: {
     position: "relative",
     whiteSpace: "nowrap",
     width: drawerWidth,
+    height: "100%",
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -140,13 +133,25 @@ const useStyles = makeStyles((theme) => ({
       width: "100%"
     }
   },
-  appBarSpacer: {
-    minHeight: "48px",
-  },
   content: {
     flex: 1,
     overflow: "auto",
-
+    margin: theme.spacing(1),
+    borderRadius: "16px",
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: theme.palette.mode === 'dark'
+      ? "0 4px 20px rgba(0, 0, 0, 0.3)"
+      : "0 4px 20px rgba(0, 0, 0, 0.08)",
+  },
+  contentFullWidth: {
+    flex: 1,
+    overflow: "auto",
+    margin: theme.spacing(1),
+    borderRadius: "16px",
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: theme.palette.mode === 'dark'
+      ? "0 4px 20px rgba(0, 0, 0, 0.3)"
+      : "0 4px 20px rgba(0, 0, 0, 0.08)",
   },
   container: {
     paddingTop: theme.spacing(4),
@@ -161,27 +166,18 @@ const useStyles = makeStyles((theme) => ({
   containerWithScroll: {
     flex: 1,
     padding: theme.spacing(1),
-    overflowY: "scroll",
+    paddingTop: theme.spacing(2),
+    overflowY: "auto",
     ...theme.scrollbarStyles,
   },
   NotificationsPopOver: {
     // color: theme.barraSuperior.secondary.main,
   },
-  logo: {
-    width: "80%",
-    height: "auto",
-    maxWidth: 180,
-    [theme.breakpoints.down("sm")]: {
-      width: "auto",
-      height: "80%",
-      maxWidth: 180,
-    },
-    logo: theme.logo
-  },
 }));
 
 const LoggedInLayout = ({ children, themeToggle }) => {
   const classes = useStyles();
+  const location = useLocation();
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -193,11 +189,20 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   const theme = useTheme();
   const { colorMode } = useContext(ColorModeContext);
-  const greaterThenSm = useMediaQuery(theme.breakpoints.up("sm"));
+  const { whitelabel, getLogo } = useWhitelabelContext();
+
+  // Determina a logo baseada no tema (light/dark)
+  const currentLogo = React.useMemo(() => {
+    const themeMode = theme.palette.type;
+    const whitelabelLogo = getLogo(themeMode);
+    return whitelabelLogo || logoDefault;
+  }, [getLogo, theme.palette.type]);
+
+  // Verifica se está na página do Dashboard (rota "/" apenas)
+  const isDashboard = location.pathname === "/";
 
   const [volume, setVolume] = useState(localStorage.getItem("volume") || 1);
 
-  const { dateToClient } = useDate();
 
   // Languages
   const [anchorElLanguage, setAnchorElLanguage] = useState(null);
@@ -354,103 +359,59 @@ const LoggedInLayout = ({ children, themeToggle }) => {
       {/* ♿ ACESSIBILIDADE: Skip Navigation Link */}
       <SkipNavigation mainId="main-content" />
 
-      <Drawer
-        variant={drawerVariant}
-        className={drawerOpen ? classes.drawerPaper : classes.drawerPaperClose}
-        classes={{
-          paper: clsx(
-            classes.drawerPaper,
-            !drawerOpen && classes.drawerPaperClose
-          ),
-        }}
-        open={drawerOpen}
-        role="navigation"
-        aria-label="Menu de navegação principal"
-      >
-        <div className={classes.toolbarIcon}>
-          <img
-            src={logo}
-            className={classes.logo}
-            alt="Logo Atendechat - Sistema de atendimento"
-          />
-          <IconButton
-            onClick={() => setDrawerOpen(!drawerOpen)}
-            aria-label={drawerOpen ? "Fechar menu de navegação" : "Abrir menu de navegação"}
-          >
-            <ChevronLeftIcon />
-          </IconButton>
-        </div>
-        <Divider />
-        <List
-          className={classes.containerWithScroll}
-          component="nav"
-          aria-label="Menu principal de navegação"
-        >
-          <MainListItems drawerClose={drawerClose} collapsed={!drawerOpen} />
-        </List>
-        <Divider />
-      </Drawer>
       <UserModal
         open={userModalOpen}
         onClose={() => setUserModalOpen(false)}
         userId={user?.id}
       />
+
+      {/* AppBar sempre no topo com 100% de largura */}
       <AppBar
-        position="absolute"
-        className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
+        position="fixed"
+        className={classes.appBar}
         color="primary"
         component="header"
         role="banner"
       >
         <Toolbar
-          variant="dense"
           className={classes.toolbar}
           role="toolbar"
           aria-label="Barra de ferramentas principal"
         >
-          <IconButton
-            edge="start"
-            variant="contained"
-            aria-label={drawerOpen ? "Fechar menu lateral" : "Abrir menu lateral"}
-            onClick={() => setDrawerOpen(!drawerOpen)}
-            className={clsx(
-              classes.menuButton,
-              drawerOpen && classes.menuButtonHidden
-            )}
-          >
-            <MenuIcon />
-          </IconButton>
+          {/* Logo no AppBar */}
+          <img
+            src={currentLogo}
+            className={classes.logo}
+            alt={`Logo ${whitelabel?.companyName || 'Atendechat'} - Sistema de atendimento`}
+          />
 
-          <Typography
-            component="h2"
-            variant="h6"
-            color="inherit"
-            noWrap
-            className={classes.title}
-          >
-            {/* {greaterThenSm && user?.profile === "admin" && getDateAndDifDays(user?.company?.dueDate).difData < 7 ? ( */}
-            {greaterThenSm && user?.profile === "admin" && user?.company?.dueDate ? (
-              <>
-                {i18n.t("mainDrawer.appBar.greeting.hello")} <b>{user.name}</b>, {i18n.t("mainDrawer.appBar.greeting.welcome")} <b>{user?.company?.name}</b>! ({i18n.t("mainDrawer.appBar.greeting.active")} {dateToClient(user?.company?.dueDate)})
-              </>
-            ) : (
-              <>
-                {i18n.t("mainDrawer.appBar.greeting.hello")} <b>{user.name}</b>, {i18n.t("mainDrawer.appBar.greeting.welcome")} <b>{user?.company?.name}</b>!
-              </>
-            )}
-          </Typography>
+          {/* Botão de menu (só aparece quando não é Dashboard) */}
+          {!isDashboard && (
+            <IconButton
+              edge="start"
+              aria-label={drawerOpen ? "Fechar menu lateral" : "Abrir menu lateral"}
+              onClick={() => setDrawerOpen(!drawerOpen)}
+              className={classes.menuButton}
+              style={{ color: "white" }}
+            >
+              {drawerOpen ? <ChevronLeftIcon /> : <MenuIcon />}
+            </IconButton>
+          )}
 
           <TopNavigationBar />
 
+          <div className={classes.title}></div>
+
           <div>
-            <IconButton edge="start">
+            <IconButton
+              edge="start"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handlemenuLanguage}
+            >
               <LanguageOutlined
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handlemenuLanguage}
-                variant="contained"
-                style={{ color: "white",marginRight:10 }}
+                style={{ color: "white", marginRight: 10 }}
               />
             </IconButton>
             <Menu
@@ -472,7 +433,7 @@ const LoggedInLayout = ({ children, themeToggle }) => {
                 <LanguageControl />
               </MenuItem>
             </Menu>
-          </div>          
+          </div>
 
           <IconButton edge="start" onClick={toggleColorMode}>
             {theme.mode === 'dark' ? <Brightness7Icon style={{ color: "white" }} /> : <Brightness4Icon style={{ color: "white" }} />}
@@ -533,16 +494,43 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           </div>
         </Toolbar>
       </AppBar>
-      <main
-        id="main-content"
-        className={classes.content}
-        role="main"
-        aria-label="Conteúdo principal"
-      >
-        <div className={classes.appBarSpacer} />
 
-        {children ? children : null}
-      </main>
+      {/* Container principal abaixo do AppBar */}
+      <div className={classes.mainContainer}>
+        {/* Drawer (menu lateral) - só aparece quando não é Dashboard */}
+        {!isDashboard && (
+          <Drawer
+            variant={drawerVariant}
+            classes={{
+              paper: clsx(
+                classes.drawerPaper,
+                !drawerOpen && classes.drawerPaperClose
+              ),
+            }}
+            open={drawerOpen}
+            role="navigation"
+            aria-label="Menu de navegação principal"
+          >
+            <List
+              className={classes.containerWithScroll}
+              component="nav"
+              aria-label="Menu principal de navegação"
+            >
+              <MainListItems drawerClose={drawerClose} collapsed={!drawerOpen} />
+            </List>
+          </Drawer>
+        )}
+
+        {/* Conteúdo principal */}
+        <main
+          id="main-content"
+          className={isDashboard ? classes.contentFullWidth : classes.content}
+          role="main"
+          aria-label="Conteúdo principal"
+        >
+          {children ? children : null}
+        </main>
+      </div>
     </div>
   );
 };

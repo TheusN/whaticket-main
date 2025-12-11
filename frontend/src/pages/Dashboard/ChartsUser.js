@@ -13,7 +13,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import brLocale from 'date-fns/locale/pt-BR';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { Button, Stack, TextField } from '@mui/material';
+import { Button, Stack } from '@mui/material';
 import Typography from "@material-ui/core/Typography";
 import api from '../../services/api';
 import { format } from 'date-fns';
@@ -119,8 +119,12 @@ export const ChatsUser = () => {
                         value={initialDate}
                         onChange={(newValue) => { setInitialDate(newValue) }}
                         label={i18n.t("dashboard.charts.user.start")}
-                        renderInput={(params) => <TextField fullWidth {...params} sx={{ width: '20ch' }} />}
-
+                        slotProps={{
+                            textField: {
+                                fullWidth: true,
+                                sx: { width: '20ch' }
+                            }
+                        }}
                     />
                 </LocalizationProvider>
 
@@ -129,7 +133,12 @@ export const ChatsUser = () => {
                         value={finalDate}
                         onChange={(newValue) => { setFinalDate(newValue) }}
                         label={i18n.t("dashboard.charts.user.end")}
-                        renderInput={(params) => <TextField fullWidth {...params} sx={{ width: '20ch' }} />}
+                        slotProps={{
+                            textField: {
+                                fullWidth: true,
+                                sx: { width: '20ch' }
+                            }
+                        }}
                     />
                 </LocalizationProvider>
 

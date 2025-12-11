@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory, useLocation } from "react-router-dom";
 import { makeStyles, Tabs, Tab } from "@material-ui/core";
 import {
   HeadsetMic,
-  ViewKanban,
+  TableChart,
   Dashboard,
   Assessment,
   Settings
@@ -54,7 +54,7 @@ const TopNavigationBar = () => {
 
     if (path.startsWith('/tickets')) return 0;
     if (path.startsWith('/kanban')) return 1;
-    if (path.startsWith('/dashboard')) return 2;
+    if (path === '/') return 2; // Dashboard é a rota raiz "/"
     if (path.startsWith('/reports')) return 3;
     if (
       path.startsWith('/connections') ||
@@ -83,6 +83,11 @@ const TopNavigationBar = () => {
 
   const [value, setValue] = useState(getCurrentTab());
 
+  // Atualiza o tab ativo quando a rota muda
+  useEffect(() => {
+    setValue(getCurrentTab());
+  }, [location.pathname]);
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
 
@@ -95,7 +100,7 @@ const TopNavigationBar = () => {
         history.push('/kanban');
         break;
       case 2:
-        history.push('/dashboard');
+        history.push('/'); // Dashboard é a rota raiz "/"
         break;
       case 3:
         history.push('/reports');
@@ -119,27 +124,22 @@ const TopNavigationBar = () => {
         <Tab
           icon={<HeadsetMic className={classes.tabIcon} />}
           label="Atendimento"
-          iconPosition="start"
         />
         <Tab
-          icon={<ViewKanban className={classes.tabIcon} />}
+          icon={<TableChart className={classes.tabIcon} />}
           label="CRM"
-          iconPosition="start"
         />
         <Tab
           icon={<Dashboard className={classes.tabIcon} />}
           label="Dashboard"
-          iconPosition="start"
         />
         <Tab
           icon={<Assessment className={classes.tabIcon} />}
           label="Relatórios"
-          iconPosition="start"
         />
         <Tab
           icon={<Settings className={classes.tabIcon} />}
           label="Configurações"
-          iconPosition="start"
         />
       </Tabs>
     </div>

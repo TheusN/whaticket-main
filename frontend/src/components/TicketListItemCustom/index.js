@@ -468,9 +468,7 @@ const useStyles = makeStyles((theme) => ({
                   </Tooltip>
                 )}
               </Typography>
-              <ListItemSecondaryAction>
-                <Box className={classes.ticketInfo1}>{renderTicketInfo()}</Box>
-              </ListItemSecondaryAction>
+              <Box className={classes.ticketInfo1}>{renderTicketInfo()}</Box>
             </span>
 
           }
@@ -485,9 +483,9 @@ const useStyles = makeStyles((theme) => ({
                 color="textSecondary"
               > {ticket.lastMessage.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>}
                 <span className={classes.secondaryContentSecond} >
-                  {ticket?.whatsapp?.name ? <Badge className={classes.connectionTag}>{ticket?.whatsapp?.name?.toUpperCase()}</Badge> : <br></br>}
-                  {ticketUser ? <Badge className={`${classes.connectionTag} ${classes.userBadge}`}>{ticketUser}</Badge> : <br></br>}
-                  <Badge style={{ backgroundColor: ticket.queue?.color || "#7c7c7c" }} className={classes.connectionTag}>{ticket.queue?.name?.toUpperCase() || i18n.t("ticketsListItem.noQueue")}</Badge>
+                  {ticket?.whatsapp?.name ? <Badge overlap="rectangular" className={classes.connectionTag}>{ticket?.whatsapp?.name?.toUpperCase()}</Badge> : <br></br>}
+                  {ticketUser ? <Badge overlap="rectangular" className={`${classes.connectionTag} ${classes.userBadge}`}>{ticketUser}</Badge> : <br></br>}
+                  <Badge overlap="rectangular" style={{ backgroundColor: ticket.queue?.color || "#7c7c7c" }} className={classes.connectionTag}>{ticket.queue?.name?.toUpperCase() || i18n.t("ticketsListItem.noQueue")}</Badge>
                 </span>
                 <span style={{ paddingTop: "2px" }} className={classes.secondaryContentSecond} >
                   {tag?.map((tag) => {
@@ -501,6 +499,7 @@ const useStyles = makeStyles((theme) => ({
               <Badge
                 className={classes.newMessagesCount}
                 badgeContent={ticket.unreadMessages}
+                overlap="rectangular"
                 classes={{
                   badge: classes.badgeStyle,
                 }}
@@ -533,44 +532,6 @@ const useStyles = makeStyles((theme) => ({
           )}
 
         </ListItemSecondaryAction>
-        <span className={classes.secondaryContentSecond} >
-          {ticket.status === "pending" && (
-            <ButtonWithSpinner
-              variant="contained"
-              className={`${classes.acceptButton} ${classes.acceptButtonStyle}`}
-              size="small"
-              loading={loading}
-              onClick={e => handleAcepptTicket(ticket.id)}
-            >
-              {i18n.t("ticketsList.buttons.accept")}
-            </ButtonWithSpinner>
-
-          )}
-          {(ticket.status !== "closed") && (
-            <ButtonWithSpinner
-              variant="contained"
-              className={`${classes.acceptButton} ${classes.closeButtonStyle}`}
-              size="small"
-              loading={loading}
-              onClick={e => handleCloseTicket(ticket.id)}
-            >
-              {i18n.t("ticketsList.buttons.closed")}
-            </ButtonWithSpinner>
-
-          )}
-          {(ticket.status === "closed") && (
-            <ButtonWithSpinner
-              variant="contained"
-              className={`${classes.acceptButton} ${classes.closeButtonStyle}`}
-              size="small"
-              loading={loading}
-              onClick={e => handleReopenTicket(ticket.id)}
-            >
-              {i18n.t("ticketsList.buttons.reopen")}
-            </ButtonWithSpinner>
-
-          )}
-        </span>
       </ListItem>
 
       <Divider variant="inset" component="li" />

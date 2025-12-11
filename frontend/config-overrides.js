@@ -10,6 +10,7 @@ module.exports = function override(config) {
     os: require.resolve('os-browserify/browser'),
     process: require.resolve('process/browser.js'),
     util: require.resolve('util/'),
+    vm: false,
     url: false,
     fs: false,
     net: false,

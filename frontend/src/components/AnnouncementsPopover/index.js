@@ -253,6 +253,7 @@ export default function AnnouncementsPopover() {
         <Badge
           color="secondary"
           variant="dot"
+          overlap="circular"
           invisible={invisible || announcements.length < 1}
         >
           <Notifications />

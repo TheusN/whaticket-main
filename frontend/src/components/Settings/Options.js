@@ -547,6 +547,7 @@ export default function Options(props) {
       </Grid>
       <Grid spacing={3} container>
         <Tabs
+          value={0}
           indicatorColor="primary"
           textColor="primary"
           scrollButtons="on"
@@ -693,6 +694,7 @@ export default function Options(props) {
       <Grid spacing={3} container
         style={{ marginBottom: 10 }}>
         <Tabs
+          value={0}
           indicatorColor="primary"
           textColor="primary"
           scrollButtons="on"

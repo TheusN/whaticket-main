@@ -129,11 +129,17 @@ export default function ChatPopover() {
   }, [searchParam]);
 
   useEffect(() => {
+    let isMounted = true;
     setLoading(true);
     const delayDebounceFn = setTimeout(() => {
-      fetchChats();
+      if (isMounted) {
+        fetchChats();
+      }
     }, 500);
-    return () => clearTimeout(delayDebounceFn);
+    return () => {
+      isMounted = false;
+      clearTimeout(delayDebounceFn);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParam, pageNumber]);
 
@@ -180,16 +186,29 @@ export default function ChatPopover() {
     }
   }, [chats, user.id]);
 
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   const fetchChats = async () => {
     try {
       const { data } = await api.get("/chats/", {
         params: { searchParam, pageNumber },
       });
-      dispatch({ type: "LOAD_CHATS", payload: data.records });
-      setHasMore(data.hasMore);
-      setLoading(false);
+      if (isMountedRef.current) {
+        dispatch({ type: "LOAD_CHATS", payload: data.records });
+        setHasMore(data.hasMore);
+        setLoading(false);
+      }
     } catch (err) {
-      toastError(err);
+      if (isMountedRef.current) {
+        toastError(err);
+      }
     }
   };
 
@@ -230,7 +249,7 @@ export default function ChatPopover() {
         onClick={handleClick}
         style={{ color: "white" }}
       >
-        <Badge color="secondary" variant="dot" invisible={invisible}>
+        <Badge color="secondary" variant="dot" overlap="circular" invisible={invisible}>
           <ForumIcon />
         </Badge>
       </IconButton>

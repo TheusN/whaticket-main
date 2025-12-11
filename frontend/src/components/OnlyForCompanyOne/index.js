@@ -1,9 +1,14 @@
-const OnlyForCompanyOne = ({ user, yes, no }) => (user.companyId === 1 || user.companyId === "1") ? yes() : no();
+const OnlyForCompanyOne = ({ user, yes, no }) => {
+  const companyId = user?.companyId;
+  const isCompanyOne = companyId === 1 || companyId === "1";
+
+  return isCompanyOne ? yes() : no();
+};
 
 OnlyForCompanyOne.defaultProps = {
-    user: {},
-	yes: () => null,
-	no: () => null,
+  user: {},
+  yes: () => null,
+  no: () => null,
 };
 
 export default OnlyForCompanyOne;

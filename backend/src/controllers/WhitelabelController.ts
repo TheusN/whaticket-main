@@ -32,11 +32,17 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     const whitelabel = await ShowWhitelabelService(companyId);
+
+    if (!whitelabel) {
+      return res.status(200).json(null);
+    }
+
     return res.status(200).json(whitelabel);
   } catch (error) {
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({ error: error.message });
     }
+    console.error("WhitelabelController show error:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };

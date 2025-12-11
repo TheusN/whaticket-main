@@ -8,14 +8,18 @@ import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { useMediaQuery, CssBaseline } from "@material-ui/core";
 import ColorModeContext from "./layout/themeContext";
 import { SocketContext, SocketManager } from './context/Socket/SocketContext';
+import { TicketsFilterProvider } from './context/Tickets/TicketsFilterContext';
+import { WhitelabelProvider, useWhitelabelContext } from './context/Whitelabel/WhitelabelContext';
 import getDesignTokens from "./theme";
 
 import Routes from "./routes";
 
 const queryClient = new QueryClient();
 
-const App = () => {
+// Componente interno que usa o WhitelabelContext para cores dinâmicas
+const ThemedApp = () => {
     const [locale, setLocale] = useState();
+    const { whitelabel, loading: whitelabelLoading } = useWhitelabelContext();
 
     const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
     const preferredTheme = window.localStorage.getItem("preferredTheme");
@@ -30,9 +34,24 @@ const App = () => {
         []
     );
 
-    const theme = createTheme(
-        getDesignTokens(mode),
-        locale
+    // Preparar cores do whitelabel para o tema
+    const whitelabelColors = React.useMemo(() => {
+        if (!whitelabel) return null;
+        return {
+            primaryColorLight: whitelabel.primaryColorLight,
+            primaryColorDark: whitelabel.primaryColorDark,
+            secondaryColorLight: whitelabel.secondaryColorLight,
+            secondaryColorDark: whitelabel.secondaryColorDark,
+            backgroundColorLight: whitelabel.backgroundColorLight,
+            backgroundColorDark: whitelabel.backgroundColorDark,
+            textColorLight: whitelabel.textColorLight,
+            textColorDark: whitelabel.textColorDark,
+        };
+    }, [whitelabel]);
+
+    const theme = React.useMemo(
+        () => createTheme(getDesignTokens(mode, whitelabelColors), locale),
+        [mode, whitelabelColors, locale]
     );
 
     useEffect(() => {
@@ -52,19 +71,28 @@ const App = () => {
         window.localStorage.setItem("preferredTheme", mode);
     }, [mode]);
 
-
-
     return (
         <ColorModeContext.Provider value={{ colorMode }}>
             <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <QueryClientProvider client={queryClient}>
                   <SocketContext.Provider value={SocketManager}>
+                    <TicketsFilterProvider>
                       <Routes />
+                    </TicketsFilterProvider>
                   </SocketContext.Provider>
                 </QueryClientProvider>
             </ThemeProvider>
         </ColorModeContext.Provider>
+    );
+};
+
+// App principal que envolve tudo com o WhitelabelProvider
+const App = () => {
+    return (
+        <WhitelabelProvider>
+            <ThemedApp />
+        </WhitelabelProvider>
     );
 };
 

@@ -63,30 +63,27 @@ const NotificationsPopOver = (volume) => {
 	const soundAlertRef = useRef();
 
 	const historyRef = useRef(history);
+	const isMountedRef = useRef(true);
 
-  const socketManager = useContext(SocketContext);
+	const socketManager = useContext(SocketContext);
 
 	useEffect(() => {
-		const fetchSettings = async () => {
-			try {
-
-				if (user.allTicket === "enable") {
-					setShowPendingTickets(true);
-				}
-			} catch (err) {
-			  	toastError(err);
-			}
-		}
-	  
-		fetchSettings();
+		isMountedRef.current = true;
+		return () => {
+			isMountedRef.current = false;
+		};
 	}, []);
+
+	useEffect(() => {
+		if (user.allTicket === "enable" && isMountedRef.current) {
+			setShowPendingTickets(true);
+		}
+	}, [user.allTicket]);
 
 	useEffect(() => {
 		soundAlertRef.current = play;
 
-		if (!("Notification" in window)) {
-			console.log("This browser doesn't support notifications");
-		} else {
+		if ("Notification" in window) {
 			Notification.requestPermission();
 		}
 	}, [play]);
