@@ -43,6 +43,7 @@ import Brightness4Icon from '@material-ui/icons/Brightness4';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import LanguageControl from "../components/LanguageControl";
 import { LanguageOutlined } from "@material-ui/icons";
+import SkipNavigation from "../components/SkipNavigation";
 
 const drawerWidth = 240;
 
@@ -349,6 +350,9 @@ const LoggedInLayout = ({ children, themeToggle }) => {
 
   return (
     <div className={classes.root}>
+      {/* ♿ ACESSIBILIDADE: Skip Navigation Link */}
+      <SkipNavigation mainId="main-content" />
+
       <Drawer
         variant={drawerVariant}
         className={drawerOpen ? classes.drawerPaper : classes.drawerPaperClose}
@@ -359,15 +363,28 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           ),
         }}
         open={drawerOpen}
+        role="navigation"
+        aria-label="Menu de navegação principal"
       >
         <div className={classes.toolbarIcon}>
-          <img src={logo} className={classes.logo} alt="logo" />
-          <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
+          <img
+            src={logo}
+            className={classes.logo}
+            alt="Logo Atendechat - Sistema de atendimento"
+          />
+          <IconButton
+            onClick={() => setDrawerOpen(!drawerOpen)}
+            aria-label={drawerOpen ? "Fechar menu de navegação" : "Abrir menu de navegação"}
+          >
             <ChevronLeftIcon />
           </IconButton>
         </div>
         <Divider />
-        <List className={classes.containerWithScroll}>
+        <List
+          className={classes.containerWithScroll}
+          component="nav"
+          aria-label="Menu principal de navegação"
+        >
           <MainListItems drawerClose={drawerClose} collapsed={!drawerOpen} />
         </List>
         <Divider />
@@ -381,12 +398,19 @@ const LoggedInLayout = ({ children, themeToggle }) => {
         position="absolute"
         className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
         color="primary"
+        component="header"
+        role="banner"
       >
-        <Toolbar variant="dense" className={classes.toolbar}>
+        <Toolbar
+          variant="dense"
+          className={classes.toolbar}
+          role="toolbar"
+          aria-label="Barra de ferramentas principal"
+        >
           <IconButton
             edge="start"
             variant="contained"
-            aria-label="open drawer"
+            aria-label={drawerOpen ? "Fechar menu lateral" : "Abrir menu lateral"}
             onClick={() => setDrawerOpen(!drawerOpen)}
             className={clsx(
               classes.menuButton,
@@ -506,7 +530,12 @@ const LoggedInLayout = ({ children, themeToggle }) => {
           </div>
         </Toolbar>
       </AppBar>
-      <main className={classes.content}>
+      <main
+        id="main-content"
+        className={classes.content}
+        role="main"
+        aria-label="Conteúdo principal"
+      >
         <div className={classes.appBarSpacer} />
 
         {children ? children : null}

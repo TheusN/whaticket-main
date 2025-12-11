@@ -32,6 +32,7 @@ import promptRoutes from "./promptRouter";
 import queueIntegrationRoutes from "./queueIntegrationRoutes";
 import forgotsRoutes from "./forgotPasswordRoutes";
 import versionRouter from "./versionRoutes";
+import whitelabelRoutes from "./whitelabelRoutes";
 const routes = Router();
 
 routes.use(userRoutes);
@@ -67,5 +68,6 @@ routes.use(promptRoutes);
 routes.use(queueIntegrationRoutes);
 routes.use(forgotsRoutes);
 routes.use(versionRouter);
+routes.use(whitelabelRoutes);
 
 export default routes;

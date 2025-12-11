@@ -97,18 +97,22 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
         wsocket = makeWASocket({
           logger: loggerBaileys,
-          printQRInTerminal: false,
-          browser: Browsers.appropriate("Desktop"),
+          printQRInTerminal: true, // Ativa QR no terminal para debug
+          browser: Browsers.ubuntu("Chrome"), // Mais estável que "appropriate"
           auth: {
             creds: state.creds,
             keys: makeCacheableSignalKeyStore(state.keys, logger),
           },
           version,
-          // defaultQueryTimeoutMs: 60000,
-          // retryRequestDelayMs: 250,
-          // keepAliveIntervalMs: 1000 * 60 * 10 * 3,
+          defaultQueryTimeoutMs: 60000, // Timeout maior para conexões lentas
+          retryRequestDelayMs: 250,
+          keepAliveIntervalMs: 1000 * 60 * 10, // 10 minutos
           msgRetryCounterCache,
+          userDevicesCache, // Adiciona cache de dispositivos
           shouldIgnoreJid: jid => isJidBroadcast(jid),
+          connectTimeoutMs: 60000, // Timeout de conexão (60s)
+          qrTimeout: 60000, // Timeout do QR Code (60s)
+          markOnlineOnConnect: true, // Marca como online ao conectar
         });
 
         // wsocket = makeWASocket({

@@ -1,183 +1,191 @@
-# Atendechat
+# 🚀 Atendechat v6.0
 
-O Atendechat é uma empresa distribuidora de White Label que possui uma solução de atendimentos via Whatsapp que aumenta a produtividade e organização das equipes
+Sistema completo de atendimento via WhatsApp com múltiplos atendentes, filas, automação e muito mais.
 
-## 🚀 Começando
+---
 
-O repositório do Atendechat possui 3 pastas importantes:
-- backend
-- frontend
-- instalador
+## ⚡ INÍCIO RÁPIDO
 
-O backend é feito em Express e possui toda a estrutura organizada dentro dessa pasta para que seja aplicado no ambiente do cliente. A pasta de frontend contém todo o framework do React.js que gerencia toda a interação com o usuário do sistema.
+### Windows (Recomendado):
 
-A pasta de instalador dentro dessa repositório é uma cópia do instalador usado para que os clientes de sistemas possam fazer o clone dentro da pasta home de seus servidores e seguirem com a instalação automática de todas as dependências do projeto
+1. **Execute o instalador:**
+   ```
+   Clique duas vezes em: INICIAR_SISTEMA.bat
+   ```
 
-Link para o repositório do instalador atualizado:
-- [Instalador](https://github.com/atendechat-org/instalador)
+2. **Aguarde:**
+   - Docker iniciará automaticamente
+   - Backend abrirá em nova janela (porta 8080)
+   - Frontend abrirá em nova janela (porta 3003)
+   - Navegador abrirá automaticamente
 
-Consulte **[Implantação](#-implanta%C3%A7%C3%A3o)** para saber como implantar o projeto.
+3. **Login:**
+   ```
+   URL: http://localhost:3003
+   Email: admin@admin.com
+   Senha: 123456
+   ```
 
-### 📋 Pré-requisitos
+**Pronto!** Sistema funcionando.
 
-```
-- Node.js v20.x
-- Postgres (release)
-- Npm ( latest )
-- Docker (bionic stable)
-- Redis
-```
+---
 
-### 🔧 Instalação
+## 📚 Documentação
 
-Para iniciar a instalação do projeto é necessário ter todas as ferramentas de pré-requisitos disponíveis para uso
+- **[CLAUDE.md](CLAUDE.md)** - Documentação técnica completa do sistema
+- **[REDESIGN-2025.md](REDESIGN-2025.md)** - Guia de redesign e modernização
 
-#### Redis
-```
-- su - root
-- docker run --name redis-${instancia_add} -p ${redis_port}:6379 --restart always --detach redis redis-server --requirepass ${root_password}
-```
+---
 
-#### Postgres
-```
-- sudo su - postgres
-- createdb ${instancia_add};
-- psql
-- CREATE USER ${instancia_add} SUPERUSER INHERIT CREATEDB CREATEROLE;
-- ALTER USER ${instancia_add} PASSWORD '${root_password}';
-```
-
-#### .env backend
-```
-NODE_ENV=
-BACKEND_URL=${backend_url}
-FRONTEND_URL=${frontend_url}
-PROXY_PORT=443
-PORT=${backend_port}
-
-DB_DIALECT=postgres
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=${instancia_add}
-DB_PASS=${mysql_root_password}
-DB_NAME=${instancia_add}
-
-JWT_SECRET=${jwt_secret}
-JWT_REFRESH_SECRET=${jwt_refresh_secret}
-
-REDIS_URI=redis://:${mysql_root_password}@127.0.0.1:${redis_port}
-REDIS_OPT_LIMITER_MAX=1
-REGIS_OPT_LIMITER_DURATION=3000
-
-USER_LIMIT=${max_user}
-CONNECTIONS_LIMIT=${max_whats}
-CLOSED_SEND_BY_ME=true
-
-GERENCIANET_SANDBOX=false
-GERENCIANET_CLIENT_ID=Client_Id_Gerencianet
-GERENCIANET_CLIENT_SECRET=Client_Secret_Gerencianet
-GERENCIANET_PIX_CERT=certificado-Gerencianet
-GERENCIANET_PIX_KEY=chave pix gerencianet
-
-# EMAIL
- MAIL_HOST="smtp.gmail.com"
- MAIL_USER="seu@gmail.com"
- MAIL_PASS="SuaSenha"
- MAIL_FROM="seu@gmail.com"
- MAIL_PORT="465"
+## 🎯 Estrutura do Projeto
 
 ```
+whaticket-main/
+├── backend/          # API Node.js + Express + TypeScript
+├── frontend/         # React.js + Material-UI
+├── docker-compose.local.yml  # PostgreSQL + Redis
+├── INICIAR_SISTEMA.bat      # Inicializador completo
+└── README.md         # Este arquivo
+```
 
-#### .env frontend
-```
-REACT_APP_BACKEND_URL=${backend_url}
-REACT_APP_HOURS_CLOSE_TICKETS_AUTO = 24
-```
+---
 
-#### Instalando dependências
-```
-cd backend/
+## 📋 Pré-requisitos
+
+**Apenas 3 programas necessários:**
+
+1. **Node.js v20+** - https://nodejs.org
+2. **Docker Desktop** - https://www.docker.com/products/docker-desktop
+3. **Git** (opcional) - https://git-scm.com
+
+> O script `INICIAR_SISTEMA.bat` verifica tudo automaticamente!
+
+---
+
+## 🔧 Instalação Manual (Avançado)
+
+Se preferir instalar manualmente sem usar o `.bat`:
+
+### 1. Instalar dependências:
+```bash
+cd backend
 npm install --force
-cd frontend/
+
+cd ../frontend
 npm install --force
 ```
 
-### Rodando localmente
+### 2. Iniciar Docker:
+```bash
+docker-compose -f docker-compose.local.yml up -d
 ```
-cd backend/
-npm run watch
+
+### 3. Iniciar Backend:
+```bash
+cd backend
 npm start
+```
 
-cd frontend/
+### 4. Iniciar Frontend (nova janela):
+```bash
+cd frontend
 npm start
 ```
 
-## ⚙️ Executando os testes
+---
 
-//
+## 🌐 URLs e Portas
 
-### 🔩 Analise os testes de ponta a ponta
+| Serviço | Porta | URL |
+|---------|-------|-----|
+| Frontend | 3003 | http://localhost:3003 |
+| Backend | 8080 | http://localhost:8080 |
+| PostgreSQL | 5432 | localhost:5432 |
+| Redis | 6379 | localhost:6379 |
 
-//
+---
 
-## 📦 Implantação em produção
-
-Para correta implantação é necessário realizar uma atualização do código fonte da aplicação e criar novamente os arquivos da pasta dist/
-
-Atenção: é necessário acessar utilizando o usuário de deploy
-
-```
-su - deploy
-```
+## 🔑 Credenciais Padrão
 
 ```
-cd /home/deploy/${empresa_atualizar}
-pm2 stop ${empresa_atualizar}-frontend
-git pull
-cd /home/deploy/${empresa_atualizar}/frontend
-npm install
-rm -rf build
-npm run build
-pm2 start ${empresa_atualizar}-frontend
-pm2 save
+Email: admin@admin.com
+Senha: 123456
 ```
 
+**⚠️ IMPORTANTE:** Troque a senha após primeiro login!
+
+---
+
+## 🛠️ Stack Tecnológica
+
+### Backend:
+- **Node.js** v20+ + **TypeScript**
+- **Express.js** - Framework web
+- **Sequelize** - ORM (PostgreSQL)
+- **Socket.io** - Real-time
+- **Bull** - Queue system
+- **Baileys** - WhatsApp Web API
+- **JWT** - Autenticação
+
+### Frontend:
+- **React** 17 + **TypeScript**
+- **Material-UI** v4 - Components
+- **Socket.io-client** - Real-time
+- **Axios** - HTTP client
+- **Formik** + **Yup** - Forms
+- **i18next** - Internacionalização
+
+### Infraestrutura:
+- **PostgreSQL** 13 - Database
+- **Redis** 7 - Cache/Queue
+- **Docker** - Containerização
+
+---
+
+## 🐛 Troubleshooting
+
+### Docker não inicia:
 ```
-cd /home/deploy/${empresa_atualizar}
-pm2 stop ${empresa_atualizar}-backend
-git pull
-cd /home/deploy/${empresa_atualizar}/backend
-npm install
-npm update -f
-npm install @types/fs-extra
-rm -rf dist 
-npm run build
-npx sequelize db:migrate
-npx sequelize db:migrate
-npx sequelize db:seed
-pm2 start ${empresa_atualizar}-backend
-pm2 save 
+Solução: Abra o Docker Desktop manualmente
 ```
 
-## 🛠️ Construído com
+### Frontend não compila:
+```
+Aguarde 5-10 minutos. É normal na primeira vez.
+```
 
+### Backend com erro:
+```
+Verifique se Docker está rodando:
+docker ps
 
-* [Express](https://expressjs.com/pt-br/) - O framework backend usado
-* [React](https://react.dev/) - Framework frontend usado
-* [NPM](https://www.npmjs.com/) - Gerenciador de dependências
+Deve mostrar: postgres e redis
+```
 
-## 🖇️ Colaborando
+### Porta já em uso:
+```
+Altere as portas nos arquivos .env (backend e frontend)
+```
 
-//
+---
+
+## 📞 Suporte
+
+- **Documentação Técnica:** [CLAUDE.md](CLAUDE.md)
+- **Guia de Redesign:** [REDESIGN-2025.md](REDESIGN-2025.md)
+
+---
 
 ## 📌 Versão
 
-Versão 1.0.0
+**v6.0.0** - Dezembro 2025
+
+---
 
 ## 📄 Licença
 
-Este projeto está sob a licença
+Todos os direitos reservados © [Atendechat](https://atendechat.com)
 
-⌨️ com ❤️ por [Atendechat](https://atendechat.com) 😊
+---
 
-Todos os direitos reservados a https://atendechat.com
+**Desenvolvido com ❤️ pela equipe Atendechat**

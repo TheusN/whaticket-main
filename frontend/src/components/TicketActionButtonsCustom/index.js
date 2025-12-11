@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
 
-import { makeStyles, createTheme, ThemeProvider } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import { IconButton } from "@material-ui/core";
 import { MoreVert, Replay } from "@material-ui/icons";
 
@@ -15,18 +15,33 @@ import { TicketsContext } from "../../context/Tickets/TicketsContext";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import UndoRoundedIcon from '@material-ui/icons/UndoRounded';
 import Tooltip from '@material-ui/core/Tooltip';
-import { green } from '@material-ui/core/colors';
-
-
 const useStyles = makeStyles(theme => ({
 	actionButtons: {
 		marginRight: 6,
 		flex: "none",
 		alignSelf: "center",
 		marginLeft: "auto",
+		display: "flex",
+		gap: theme.spacing(0.5),
 		"& > *": {
 			margin: theme.spacing(0.5),
 		},
+	},
+	resolveButton: {
+		color: theme.palette.success.main,
+		"&:hover": {
+			backgroundColor: theme.mode === 'dark'
+				? "rgba(16, 185, 129, 0.08)"
+				: "rgba(16, 185, 129, 0.12)",
+		}
+	},
+	returnButton: {
+		color: theme.palette.warning.main,
+		"&:hover": {
+			backgroundColor: theme.mode === 'dark'
+				? "rgba(245, 158, 11, 0.08)"
+				: "rgba(245, 158, 11, 0.12)",
+		}
 	},
 }));
 
@@ -38,12 +53,6 @@ const TicketActionButtonsCustom = ({ ticket }) => {
 	const ticketOptionsMenuOpen = Boolean(anchorEl);
 	const { user } = useContext(AuthContext);
 	const { setCurrentTicket } = useContext(TicketsContext);
-
-	const customTheme = createTheme({
-		palette: {
-		  	primary: green,
-		}
-	});
 
 	const handleOpenTicketOptionsMenu = e => {
 		setAnchorEl(e.currentTarget);
@@ -92,17 +101,21 @@ const TicketActionButtonsCustom = ({ ticket }) => {
 			{ticket.status === "open" && (
 				<>
 					<Tooltip title={i18n.t("messagesList.header.buttons.return")}>
-						<IconButton onClick={e => handleUpdateTicketStatus(e, "pending", null)}>
+						<IconButton
+							onClick={e => handleUpdateTicketStatus(e, "pending", null)}
+							className={classes.returnButton}
+						>
 							<UndoRoundedIcon />
 						</IconButton>
 					</Tooltip>
-					<ThemeProvider theme={customTheme}>
-						<Tooltip title={i18n.t("messagesList.header.buttons.resolve")}>
-							<IconButton onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)} color="primary">
-								<CheckCircleIcon />
-							</IconButton>
-						</Tooltip>
-					</ThemeProvider>
+					<Tooltip title={i18n.t("messagesList.header.buttons.resolve")}>
+						<IconButton
+							onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)}
+							className={classes.resolveButton}
+						>
+							<CheckCircleIcon />
+						</IconButton>
+					</Tooltip>
 					{/* <ButtonWithSpinner
 						loading={loading}
 						startIcon={<Replay />}

@@ -5,18 +5,19 @@ import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
 import Link from "@material-ui/core/Link";
-import Grid from "@material-ui/core/Grid"; 
+import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
+import InputAdornment from "@material-ui/core/InputAdornment";
 import { versionSystem } from "../../../package.json";
 import { i18n } from "../../translate/i18n";
 import { nomeEmpresa } from "../../../package.json";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import logo from "../../assets/logo.png";
-import {LanguageOutlined} from "@material-ui/icons";
-import {IconButton, Menu, MenuItem} from "@material-ui/core";
+import { LanguageOutlined, Visibility, VisibilityOff } from "@material-ui/icons";
+import { IconButton, Menu, MenuItem } from "@material-ui/core";
 import LanguageControl from "../../components/LanguageControl";
 
 
@@ -84,6 +85,7 @@ const Login = () => {
 	const classes = useStyles();
 
 	const [user, setUser] = useState({ email: "", password: "" });
+	const [showPassword, setShowPassword] = useState(false);
 
 	// Languages
 	const [anchorElLanguage, setAnchorElLanguage] = useState(null);
@@ -109,18 +111,23 @@ const Login = () => {
 		setAnchorElLanguage(null);
 		setMenuLanguageOpen(false);
 	}
+
+	const handleTogglePasswordVisibility = () => {
+		setShowPassword(!showPassword);
+	};
 	
 	return (
 		<div className={classes.root}>
 		<div className={classes.languageControl}>
-			<IconButton edge="start">
+			<IconButton
+				edge="start"
+				aria-label="selecionar idioma"
+				aria-controls="menu-appbar"
+				aria-haspopup="true"
+				onClick={handlemenuLanguage}
+			>
 				<LanguageOutlined
-					aria-label="account of current user"
-					aria-controls="menu-appbar"
-					aria-haspopup="true"
-					onClick={handlemenuLanguage}
-					variant="contained"
-					style={{ color: "white",marginRight:10 }}
+					style={{ color: "white" }}
 				/>
 			</IconButton>
 			<Menu
@@ -173,11 +180,26 @@ const Login = () => {
 						fullWidth
 						name="password"
 						label={i18n.t("login.form.password")}
-						type="password"
+						type={showPassword ? "text" : "password"}
 						id="password"
 						value={user.password}
 						onChange={handleChangeInput}
 						autoComplete="current-password"
+						InputProps={{
+							endAdornment: (
+								<InputAdornment position="end">
+									<IconButton
+										aria-label="alternar visibilidade da senha"
+										onClick={handleTogglePasswordVisibility}
+										edge="end"
+										style={{ minWidth: 48, minHeight: 48 }}
+										title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+									>
+										{showPassword ? <Visibility /> : <VisibilityOff />}
+									</IconButton>
+								</InputAdornment>
+							),
+						}}
 					/>
 					
 					{/* <Grid container justify="flex-end">

@@ -26,10 +26,32 @@ app.set("queues", {
 const bodyparser = require('body-parser');
 app.use(bodyParser.json({ limit: '10mb' }));
 
+// Lista de origens permitidas
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:3003',
+  'http://localhost:3000',
+  'http://127.0.0.1:3003',
+  'http://127.0.0.1:3000',
+];
+
 app.use(
   cors({
     credentials: true,
-    origin: process.env.FRONTEND_URL
+    origin: function (origin, callback) {
+      // Permite requisições sem origin (mobile apps, Postman, etc)
+      if (!origin) return callback(null, true);
+
+      // Permite qualquer IP da rede local (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
+      const isLocalNetwork = /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})(:\d+)?$/.test(origin);
+
+      if (allowedOrigins.indexOf(origin) !== -1 || isLocalNetwork) {
+        callback(null, true);
+      } else {
+        console.log('CORS blocked origin:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    }
   })
 );
 app.use(cookieParser());

@@ -14,19 +14,19 @@ import SettingsOutlinedIcon from "@material-ui/icons/SettingsOutlined";
 import PeopleAltOutlinedIcon from "@material-ui/icons/PeopleAltOutlined";
 import ContactPhoneOutlinedIcon from "@material-ui/icons/ContactPhoneOutlined";
 import AccountTreeOutlinedIcon from "@material-ui/icons/AccountTreeOutlined";
-import FlashOnIcon from "@material-ui/icons/FlashOn";
+import FlashOnIcon from "@material-ui/icons/FlashOnOutlined";
 import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import CodeRoundedIcon from "@material-ui/icons/CodeRounded";
-import EventIcon from "@material-ui/icons/Event";
-import LocalOfferIcon from "@material-ui/icons/LocalOffer";
-import EventAvailableIcon from "@material-ui/icons/EventAvailable";
+import EventIcon from "@material-ui/icons/EventOutlined";
+import LocalOfferIcon from "@material-ui/icons/LocalOfferOutlined";
+import EventAvailableIcon from "@material-ui/icons/EventAvailableOutlined";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import PeopleIcon from "@material-ui/icons/People";
-import ListIcon from "@material-ui/icons/ListAlt";
-import AnnouncementIcon from "@material-ui/icons/Announcement";
-import ForumIcon from "@material-ui/icons/Forum";
-import LocalAtmIcon from '@material-ui/icons/LocalAtm';
+import PeopleIcon from "@material-ui/icons/PeopleOutlined";
+import ListIcon from "@material-ui/icons/ListAltOutlined";
+import AnnouncementIcon from "@material-ui/icons/AnnouncementOutlined";
+import ForumIcon from "@material-ui/icons/ForumOutlined";
+import LocalAtmIcon from '@material-ui/icons/LocalAtmOutlined';
 import RotateRight from "@material-ui/icons/RotateRight";
 import { i18n } from "../translate/i18n";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
@@ -35,13 +35,13 @@ import LoyaltyRoundedIcon from '@material-ui/icons/LoyaltyRounded';
 import { Can } from "../components/Can";
 import { SocketContext } from "../context/Socket/SocketContext";
 import { isArray } from "lodash";
-import TableChartIcon from '@material-ui/icons/TableChart';
+import TableChartIcon from '@material-ui/icons/TableChartOutlined';
 import api from "../services/api";
-import BorderColorIcon from '@material-ui/icons/BorderColor';
+import BorderColorIcon from '@material-ui/icons/BorderColorOutlined';
 import ToDoList from "../pages/ToDoList/";
 import toastError from "../errors/toastError";
 import { makeStyles } from "@material-ui/core/styles";
-import { AllInclusive, AttachFile, BlurCircular, DeviceHubOutlined, Schedule } from '@material-ui/icons';
+import { AllInclusive, AttachFileOutlined, BlurCircular, DeviceHubOutlined, Schedule } from '@material-ui/icons';
 import usePlans from "../hooks/usePlans";
 import Typography from "@material-ui/core/Typography";
 import useVersion from "../hooks/useVersion";
@@ -52,11 +52,45 @@ const useStyles = makeStyles((theme) => ({
     marginTop: "-15px",
     marginBottom: "-10px",
   },
+  listItem: {
+    borderRadius: "8px",
+    margin: "4px 8px",
+    padding: "8px 12px",
+    transition: "all 0.2s ease-in-out",
+    "&:hover": {
+      backgroundColor: theme.mode === 'dark'
+        ? "rgba(255, 255, 255, 0.08)"
+        : "rgba(139, 92, 246, 0.08)", // Roxo claro visível
+      transform: "translateX(4px)",
+    },
+    "&.Mui-selected": {
+      backgroundColor: theme.mode === 'dark'
+        ? "rgba(139, 92, 246, 0.2)"
+        : "rgba(139, 92, 246, 0.12)", // Mais visível no claro
+      borderLeft: `3px solid ${theme.palette.primary.main}`,
+      "&:hover": {
+        backgroundColor: theme.mode === 'dark'
+          ? "rgba(139, 92, 246, 0.3)"
+          : "rgba(139, 92, 246, 0.18)",
+      }
+    }
+  },
+  listItemIcon: {
+    minWidth: "40px",
+    color: theme.palette.text.primary,
+  },
+  listItemText: {
+    "& .MuiTypography-root": {
+      fontSize: "0.9rem",
+      fontWeight: 500,
+    }
+  }
 }));
 
 
 function ListItemLink(props) {
   const { icon, primary, to, className } = props;
+  const classes = useStyles();
 
   const renderLink = React.useMemo(
     () =>
@@ -68,9 +102,18 @@ function ListItemLink(props) {
 
   return (
     <li>
-      <ListItem button dense component={renderLink} className={className}>
-        {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-        <ListItemText primary={primary} />
+      <ListItem
+        button
+        dense
+        component={renderLink}
+        className={`${classes.listItem} ${className || ''}`}
+      >
+        {icon ? (
+          <ListItemIcon className={classes.listItemIcon}>
+            {icon}
+          </ListItemIcon>
+        ) : null}
+        <ListItemText primary={primary} className={classes.listItemText} />
       </ListItem>
     </li>
   );
@@ -381,12 +424,14 @@ const MainListItems = (props) => {
                 <ListItem
                   button
                   onClick={() => setOpenCampaignSubmenu((prev) => !prev)}
+                  className={classes.listItem}
                 >
-                  <ListItemIcon>
+                  <ListItemIcon className={classes.listItemIcon}>
                     <EventAvailableIcon />
                   </ListItemIcon>
                   <ListItemText
                     primary={i18n.t("mainDrawer.listItems.campaigns")}
+                    className={classes.listItemText}
                   />
                   {openCampaignSubmenu ? (
                     <ExpandLessIcon />
@@ -401,29 +446,31 @@ const MainListItems = (props) => {
                   unmountOnExit
                 >
                   <List component="div" disablePadding>
-                    <ListItem onClick={() => history.push("/campaigns")} button>
-                      <ListItemIcon>
+                    <ListItem onClick={() => history.push("/campaigns")} button className={classes.listItem}>
+                      <ListItemIcon className={classes.listItemIcon}>
                         <ListIcon />
                       </ListItemIcon>
-                      <ListItemText primary="Listagem" />
+                      <ListItemText primary="Listagem" className={classes.listItemText} />
                     </ListItem>
                     <ListItem
                       onClick={() => history.push("/contact-lists")}
                       button
+                      className={classes.listItem}
                     >
-                      <ListItemIcon>
+                      <ListItemIcon className={classes.listItemIcon}>
                         <PeopleIcon />
                       </ListItemIcon>
-                      <ListItemText primary="Listas de Contatos" />
+                      <ListItemText primary="Listas de Contatos" className={classes.listItemText} />
                     </ListItem>
                     <ListItem
                       onClick={() => history.push("/campaigns-config")}
                       button
+                      className={classes.listItem}
                     >
-                      <ListItemIcon>
+                      <ListItemIcon className={classes.listItemIcon}>
                         <SettingsOutlinedIcon />
                       </ListItemIcon>
-                      <ListItemText primary="Configurações" />
+                      <ListItemText primary="Configurações" className={classes.listItemText} />
                     </ListItem>
                   </List>
                 </Collapse>
@@ -463,7 +510,7 @@ const MainListItems = (props) => {
             <ListItemLink
               to="/files"
               primary={i18n.t("mainDrawer.listItems.files")}
-              icon={<AttachFile />}
+              icon={<AttachFileOutlined />}
             />
             <ListItemLink
               to="/queues"

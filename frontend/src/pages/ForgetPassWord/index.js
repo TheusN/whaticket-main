@@ -254,6 +254,10 @@ const handleSendEmail = async (values) => {
                               <InputAdornment position="end">
                                 <IconButton
                                   onClick={togglePasswordVisibility}
+                                  aria-label="alternar visibilidade da senha"
+                                  edge="end"
+                                  style={{ minWidth: 48, minHeight: 48 }}
+                                  title={showPassword ? "Ocultar senha" : "Mostrar senha"}
                                 >
                                   {showPassword ? (
                                     <VisibilityIcon />
@@ -290,6 +294,10 @@ const handleSendEmail = async (values) => {
                               <InputAdornment position="end">
                                 <IconButton
                                   onClick={toggleConfirmPasswordVisibility}
+                                  aria-label="alternar visibilidade da confirmação de senha"
+                                  edge="end"
+                                  style={{ minWidth: 48, minHeight: 48 }}
+                                  title={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
                                 >
                                   {showConfirmPassword ? (
                                     <VisibilityIcon />

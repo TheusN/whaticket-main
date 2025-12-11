@@ -5,7 +5,6 @@ import { parseISO, format, isSameDay } from "date-fns";
 import clsx from "clsx";
 
 import { makeStyles } from "@material-ui/core/styles";
-import { green, grey, red, blue } from "@material-ui/core/colors";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
@@ -46,8 +45,10 @@ const useStyles = makeStyles((theme) => ({
     cursor: "unset",
   },
   queueTag: {
-    background: "#FCFCFC",
-    color: "#000",
+    background: theme.palette.mode === 'dark'
+      ? "rgba(255, 255, 255, 0.08)"
+      : "rgba(0, 0, 0, 0.06)",
+    color: theme.palette.text.primary,
     marginRight: 1,
     padding: 1,
     fontWeight: 'bold',
@@ -81,7 +82,7 @@ const useStyles = makeStyles((theme) => ({
     lineHeight: "1.4",
   },
   connectionTag: {
-    background: "green",
+    background: theme.palette.success.main,
     color: "#FFF",
     marginRight: 1,
     padding: 1,
@@ -127,7 +128,7 @@ const useStyles = makeStyles((theme) => ({
 
   badgeStyle: {
     color: "white",
-    backgroundColor: green[500],
+    backgroundColor: theme.palette.success.main,
   },
 
   acceptButton: {
@@ -180,7 +181,41 @@ const useStyles = makeStyles((theme) => ({
     "& .MuiBadge-anchorOriginTopRightRectangle": {
       transform: "scale(1) translate(0%, -40%)",
     },
-
+  },
+  acceptButtonStyle: {
+    backgroundColor: theme.palette.success.main,
+    color: 'white',
+    padding: '0px',
+    bottom: '17px',
+    borderRadius: '0px',
+    left: '8px',
+    fontSize: '0.6rem',
+    '&:hover': {
+      backgroundColor: theme.palette.success.dark,
+    }
+  },
+  closeButtonStyle: {
+    backgroundColor: theme.palette.error.main,
+    color: 'white',
+    padding: '0px',
+    bottom: '0px',
+    borderRadius: '0px',
+    left: '8px',
+    fontSize: '0.6rem',
+    '&:hover': {
+      backgroundColor: theme.palette.error.dark,
+    }
+  },
+  userBadge: {
+    backgroundColor: theme.palette.mode === 'dark'
+      ? "rgba(139, 92, 246, 0.8)"
+      : theme.palette.primary.main,
+  },
+  androidIcon: {
+    color: theme.palette.text.secondary,
+  },
+  visibilityIcon: {
+    color: theme.palette.info.main,
   }
 }));
   {/*PLW DESIGN INSERIDO O dentro do const handleChangeTab*/}
@@ -334,7 +369,8 @@ const useStyles = makeStyles((theme) => ({
             <Tooltip title={i18n.t("ticketsListItem.tooltip.chatbot")}>
               <AndroidIcon
                 fontSize="small"
-                style={{ color: grey[700], marginRight: 5 }}
+                className={classes.androidIcon}
+                style={{ marginRight: 5 }}
               />
             </Tooltip>
           )}
@@ -349,7 +385,8 @@ const useStyles = makeStyles((theme) => ({
             <Tooltip title={i18n.t("ticketsListItem.tooltip.chatbot")}>
               <AndroidIcon
                 fontSize="small"
-                style={{ color: grey[700], marginRight: 5 }}
+                className={classes.androidIcon}
+                style={{ marginRight: 5 }}
               />
             </Tooltip>
           )}
@@ -421,8 +458,8 @@ const useStyles = makeStyles((theme) => ({
                     <VisibilityIcon
                       onClick={() => setOpenTicketMessageDialog(true)}
                       fontSize="small"
+                      className={classes.visibilityIcon}
                       style={{
-                        color: blue[700],
                         cursor: "pointer",
                         marginLeft: 10,
                         verticalAlign: "middle"
@@ -449,7 +486,7 @@ const useStyles = makeStyles((theme) => ({
               > {ticket.lastMessage.includes('data:image/png;base64') ? <MarkdownWrapper> Localização</MarkdownWrapper> : <MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>}
                 <span className={classes.secondaryContentSecond} >
                   {ticket?.whatsapp?.name ? <Badge className={classes.connectionTag}>{ticket?.whatsapp?.name?.toUpperCase()}</Badge> : <br></br>}
-                  {ticketUser ? <Badge style={{ backgroundColor: "#000000" }} className={classes.connectionTag}>{ticketUser}</Badge> : <br></br>}
+                  {ticketUser ? <Badge className={`${classes.connectionTag} ${classes.userBadge}`}>{ticketUser}</Badge> : <br></br>}
                   <Badge style={{ backgroundColor: ticket.queue?.color || "#7c7c7c" }} className={classes.connectionTag}>{ticket.queue?.name?.toUpperCase() || i18n.t("ticketsListItem.noQueue")}</Badge>
                 </span>
                 <span style={{ paddingTop: "2px" }} className={classes.secondaryContentSecond} >
@@ -499,13 +536,10 @@ const useStyles = makeStyles((theme) => ({
         <span className={classes.secondaryContentSecond} >
           {ticket.status === "pending" && (
             <ButtonWithSpinner
-              //color="primary"
-              style={{ backgroundColor: 'green', color: 'white', padding: '0px', bottom: '17px', borderRadius: '0px', left: '8px', fontSize: '0.6rem' }}
               variant="contained"
-              className={classes.acceptButton}
+              className={`${classes.acceptButton} ${classes.acceptButtonStyle}`}
               size="small"
               loading={loading}
-			  //PLW DESIGN INSERIDO O handleChangeTab
               onClick={e => handleAcepptTicket(ticket.id)}
             >
               {i18n.t("ticketsList.buttons.accept")}
@@ -514,10 +548,8 @@ const useStyles = makeStyles((theme) => ({
           )}
           {(ticket.status !== "closed") && (
             <ButtonWithSpinner
-              //color="primary"
-              style={{ backgroundColor: 'red', color: 'white', padding: '0px', bottom: '0px', borderRadius: '0px', left: '8px', fontSize: '0.6rem' }}
               variant="contained"
-              className={classes.acceptButton}
+              className={`${classes.acceptButton} ${classes.closeButtonStyle}`}
               size="small"
               loading={loading}
               onClick={e => handleCloseTicket(ticket.id)}
@@ -528,10 +560,8 @@ const useStyles = makeStyles((theme) => ({
           )}
           {(ticket.status === "closed") && (
             <ButtonWithSpinner
-              //color="primary"
-              style={{ backgroundColor: 'red', color: 'white', padding: '0px', bottom: '0px', borderRadius: '0px', left: '8px', fontSize: '0.6rem' }}
               variant="contained"
-              className={classes.acceptButton}
+              className={`${classes.acceptButton} ${classes.closeButtonStyle}`}
               size="small"
               loading={loading}
               onClick={e => handleReopenTicket(ticket.id)}

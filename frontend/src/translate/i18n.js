@@ -1,7 +1,7 @@
 import i18n from "i18next";
 import { messages } from "./languages";
 
-const savedLanguage = localStorage.getItem('i18nextLng') || 'en';
+const savedLanguage = localStorage.getItem('i18nextLng') || 'pt';
 
 i18n.init({
 	debug: true,

@@ -7,7 +7,6 @@ import { Link as RouterLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Formik, Form, Field } from "formik";
 import usePlans from "../../hooks/usePlans";
-import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
@@ -15,13 +14,14 @@ import Link from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import InputMask from 'react-input-mask';
+import InputAdornment from "@material-ui/core/InputAdornment";
+import IconButton from "@material-ui/core/IconButton";
 import {
-	FormControl,
 	InputLabel,
 	MenuItem,
 	Select,
 } from "@material-ui/core";
-import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
+import { Visibility, VisibilityOff } from "@material-ui/icons";
 import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
@@ -31,18 +31,6 @@ import { i18n } from "../../translate/i18n";
 import { openApi } from "../../services/api";
 import toastError from "../../errors/toastError";
 import moment from "moment";
-const Copyright = () => {
-	return (
-		<Typography variant="body2" color="textSecondary" align="center">
-			{"Copyright © "}
-			<Link color="inherit" href="#">
-				PLW
-			</Link>{" "}
-		   {new Date().getFullYear()}
-			{"."}
-		</Typography>
-	);
-};
 
 const useStyles = makeStyles(theme => ({
 	paper: {
@@ -50,10 +38,6 @@ const useStyles = makeStyles(theme => ({
 		display: "flex",
 		flexDirection: "column",
 		alignItems: "center",
-	},
-	avatar: {
-		margin: theme.spacing(1),
-		backgroundColor: theme.palette.secondary.main,
 	},
 	form: {
 		width: "100%",
@@ -76,17 +60,16 @@ const UserSchema = Yup.object().shape({
 const SignUp = () => {
 	const classes = useStyles();
 	const history = useHistory();
-	let companyId = null
-
-	const params = qs.parse(window.location.search)
-	if (params.companyId !== undefined) {
-		companyId = params.companyId
-	}
 
 	const initialState = { name: "", email: "", phone: "", password: "", planId: "", };
 
 	const [user] = useState(initialState);
+	const [showPassword, setShowPassword] = useState(false);
 	const dueDate = moment().add(3, "day").format();
+
+	const handleTogglePasswordVisibility = () => {
+		setShowPassword(!showPassword);
+	};
 	const handleSignUp = async values => {
 		Object.assign(values, { recurrence: "MENSAL" });
 		Object.assign(values, { dueDate: dueDate });
@@ -111,7 +94,7 @@ const SignUp = () => {
 			setPlans(list);
 		}
 		fetchData();
-	}, []);
+	}, [listPlans]);
 
 
 	return (
@@ -201,10 +184,25 @@ const SignUp = () => {
 										error={touched.password && Boolean(errors.password)}
 										helperText={touched.password && errors.password}
 										label={i18n.t("signup.form.password")}
-										type="password"
+										type={showPassword ? "text" : "password"}
 										id="password"
 										autoComplete="current-password"
 										required
+										InputProps={{
+											endAdornment: (
+												<InputAdornment position="end">
+													<IconButton
+														aria-label="alternar visibilidade da senha"
+														onClick={handleTogglePasswordVisibility}
+														edge="end"
+														style={{ minWidth: 48, minHeight: 48 }}
+														title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+													>
+														{showPassword ? <Visibility /> : <VisibilityOff />}
+													</IconButton>
+												</InputAdornment>
+											),
+										}}
 									/>
 								</Grid>
 								<Grid item xs={12}>

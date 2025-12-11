@@ -9,6 +9,8 @@ import { SocketContext } from "../../context/Socket/SocketContext";
 
 const QrcodeModal = ({ open, onClose, whatsAppId }) => {
   const [qrCode, setQrCode] = useState("");
+  const [countdown, setCountdown] = useState(60);
+  const [attempt, setAttempt] = useState(1);
   const theme = useTheme();
 
   const socketManager = useContext(SocketContext);
@@ -27,6 +29,17 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
     fetchSession();
   }, [whatsAppId]);
 
+  // Contador regressivo do QR Code
+  useEffect(() => {
+    if (!qrCode || countdown <= 0) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [qrCode, countdown]);
+
   useEffect(() => {
     if (!whatsAppId) return;
     const companyId = localStorage.getItem("companyId");
@@ -35,6 +48,10 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
     socket.on(`company-${companyId}-whatsappSession`, (data) => {
       if (data.action === "update" && data.session.id === whatsAppId) {
         setQrCode(data.session.qrcode);
+        if (data.session.qrcode) {
+          setCountdown(60); // Reseta contador quando novo QR chegar
+          setAttempt((prev) => prev + 1);
+        }
       }
 
       if (data.action === "update" && data.session.qrcode === "") {
@@ -68,11 +85,53 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
               {i18n.t("qrCodeModal.steps.four")}
             </Typography>
           </div>
-          <div>
-            {qrCode ? (
-              <QRCode value={qrCode} size={256} />
-            ) : (
-              <span>{i18n.t("qrCodeModal.waiting")}</span>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <div style={{
+              padding: "20px",
+              background: "#fff",
+              borderRadius: "12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minWidth: "300px",
+              minHeight: "300px",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            }}>
+              {qrCode ? (
+                <QRCode
+                  value={qrCode}
+                  size={280}
+                  level="H"
+                  includeMargin={true}
+                  bgColor="#FFFFFF"
+                  fgColor="#000000"
+                  renderAs="svg"
+                  imageSettings={{
+                    height: 40,
+                    width: 40,
+                    excavate: true,
+                  }}
+                />
+              ) : (
+                <Typography variant="body1" color="textSecondary">
+                  {i18n.t("qrCodeModal.waiting")}
+                </Typography>
+              )}
+            </div>
+            {qrCode && (
+              <div style={{ marginTop: "16px", textAlign: "center" }}>
+                <Typography variant="body2" color="textSecondary" style={{ marginBottom: "8px" }}>
+                  ⏱️ Tempo restante: <strong>{countdown}s</strong>
+                </Typography>
+                <Typography variant="caption" color="textSecondary">
+                  Tentativa: {attempt}/3
+                </Typography>
+                {countdown <= 10 && (
+                  <Typography variant="caption" color="error" style={{ display: "block", marginTop: "8px" }}>
+                    ⚠️ QR Code expirando! Um novo será gerado automaticamente.
+                  </Typography>
+                )}
+              </div>
             )}
           </div>
         </Paper>

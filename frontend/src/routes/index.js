@@ -1,42 +1,46 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import { BrowserRouter, Switch } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import BackdropLoading from "../components/BackdropLoading";
 
 import LoggedInLayout from "../layout";
-import Dashboard from "../pages/Dashboard/";
-import TicketResponsiveContainer from "../pages/TicketResponsiveContainer";
-import Signup from "../pages/Signup/";
-import Login from "../pages/Login/";
-import Connections from "../pages/Connections/";
-import SettingsCustom from "../pages/SettingsCustom/";
-import Financeiro from "../pages/Financeiro/";
-import Users from "../pages/Users";
-import Contacts from "../pages/Contacts/";
-import Queues from "../pages/Queues/";
-import Tags from "../pages/Tags/";
-import MessagesAPI from "../pages/MessagesAPI/";
-import Helps from "../pages/Helps/";
-import ContactLists from "../pages/ContactLists/";
-import ContactListItems from "../pages/ContactListItems/";
-// import Companies from "../pages/Companies/";
-import QuickMessages from "../pages/QuickMessages/";
-import Kanban from "../pages/Kanban";
 import { AuthProvider } from "../context/Auth/AuthContext";
 import { TicketsContextProvider } from "../context/Tickets/TicketsContext";
 import { WhatsAppsProvider } from "../context/WhatsApp/WhatsAppsContext";
 import Route from "./Route";
-import Schedules from "../pages/Schedules";
-import Campaigns from "../pages/Campaigns";
-import CampaignsConfig from "../pages/CampaignsConfig";
-import CampaignReport from "../pages/CampaignReport";
-import Annoucements from "../pages/Annoucements";
-import Chat from "../pages/Chat";
-import ToDoList from "../pages/ToDoList/";
-import Subscription from "../pages/Subscription/";
-import Files from "../pages/Files/";
-import Prompts from "../pages/Prompts";
-import QueueIntegration from "../pages/QueueIntegration";
-import ForgetPassword from "../pages/ForgetPassWord/"; // Reset PassWd
+
+// ⚡ PERFORMANCE: Importações críticas (carregadas imediatamente)
+import Login from "../pages/Login/";
+import Signup from "../pages/Signup/";
+import ForgetPassword from "../pages/ForgetPassWord/";
+
+// ⚡ PERFORMANCE: Lazy loading de páginas não críticas (code splitting)
+const Dashboard = lazy(() => import("../pages/Dashboard/"));
+const TicketResponsiveContainer = lazy(() => import("../pages/TicketResponsiveContainer"));
+const Connections = lazy(() => import("../pages/Connections/"));
+const SettingsCustom = lazy(() => import("../pages/SettingsCustom/"));
+const Financeiro = lazy(() => import("../pages/Financeiro/"));
+const Users = lazy(() => import("../pages/Users"));
+const Contacts = lazy(() => import("../pages/Contacts/"));
+const Queues = lazy(() => import("../pages/Queues/"));
+const Tags = lazy(() => import("../pages/Tags/"));
+const MessagesAPI = lazy(() => import("../pages/MessagesAPI/"));
+const Helps = lazy(() => import("../pages/Helps/"));
+const ContactLists = lazy(() => import("../pages/ContactLists/"));
+const ContactListItems = lazy(() => import("../pages/ContactListItems/"));
+const QuickMessages = lazy(() => import("../pages/QuickMessages/"));
+const Kanban = lazy(() => import("../pages/Kanban"));
+const Schedules = lazy(() => import("../pages/Schedules"));
+const Campaigns = lazy(() => import("../pages/Campaigns"));
+const CampaignsConfig = lazy(() => import("../pages/CampaignsConfig"));
+const CampaignReport = lazy(() => import("../pages/CampaignReport"));
+const Annoucements = lazy(() => import("../pages/Annoucements"));
+const Chat = lazy(() => import("../pages/Chat"));
+const ToDoList = lazy(() => import("../pages/ToDoList/"));
+const Subscription = lazy(() => import("../pages/Subscription/"));
+const Files = lazy(() => import("../pages/Files/"));
+const Prompts = lazy(() => import("../pages/Prompts"));
+const QueueIntegration = lazy(() => import("../pages/QueueIntegration"));
 
 const Routes = () => {
   const [showCampaigns, setShowCampaigns] = useState(false);
@@ -53,12 +57,15 @@ const Routes = () => {
       <AuthProvider>
         <TicketsContextProvider>
           <Switch>
+            {/* ⚡ PERFORMANCE: Rotas críticas sem lazy loading */}
             <Route exact path="/login" component={Login} />
             <Route exact path="/signup" component={Signup} />
-			      <Route exact path="/forgetpsw" component={ForgetPassword} /> 
+			      <Route exact path="/forgetpsw" component={ForgetPassword} />
             {/* <Route exact path="/create-company" component={Companies} /> */}
             <WhatsAppsProvider>
               <LoggedInLayout>
+                {/* ⚡ PERFORMANCE: Suspense para lazy loading com fallback */}
+                <Suspense fallback={<BackdropLoading />}>
                 <Route exact path="/" component={Dashboard} isPrivate />
                 <Route
                   exact
@@ -170,6 +177,7 @@ const Routes = () => {
                     />
                   </>
                 )}
+                </Suspense>
               </LoggedInLayout>
             </WhatsAppsProvider>
           </Switch>
