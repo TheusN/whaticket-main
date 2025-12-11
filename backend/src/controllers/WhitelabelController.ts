@@ -54,7 +54,21 @@ export const showByCompany = async (req: Request, res: Response): Promise<Respon
     return res.status(403).json({ error: "Whitelabel only available for company 1" });
   }
 
-  return show(req, res);
+  try {
+    const whitelabel = await ShowWhitelabelService(parseInt(companyId));
+
+    if (!whitelabel) {
+      return res.status(200).json(null);
+    }
+
+    return res.status(200).json(whitelabel);
+  } catch (error) {
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    console.error("WhitelabelController showByCompany error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 export const update = async (req: Request, res: Response): Promise<Response> => {
