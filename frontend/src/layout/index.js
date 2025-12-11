@@ -31,6 +31,7 @@ import DarkMode from "../components/DarkMode";
 import { i18n } from "../translate/i18n";
 import toastError from "../errors/toastError";
 import AnnouncementsPopover from "../components/AnnouncementsPopover";
+import TopNavigationBar from "../components/TopNavigationBar";
 
 import logo from "../assets/logo.png";
 import { SocketContext } from "../context/Socket/SocketContext";
@@ -438,7 +439,9 @@ const LoggedInLayout = ({ children, themeToggle }) => {
               </>
             )}
           </Typography>
-          
+
+          <TopNavigationBar />
+
           <div>
             <IconButton edge="start">
               <LanguageOutlined

@@ -185,10 +185,25 @@ const MainListItems = (props) => {
   const [showCampaigns, setShowCampaigns] = useState(false);
   const [showKanban, setShowKanban] = useState(false);
   const [showOpenAi, setShowOpenAi] = useState(false);
-  const [showIntegrations, setShowIntegrations] = useState(false); const history = useHistory();
+  const [showIntegrations, setShowIntegrations] = useState(false);
+  const history = useHistory();
+  const location = history.location;
   const [showSchedules, setShowSchedules] = useState(false);
   const [showInternalChat, setShowInternalChat] = useState(false);
   const [showExternalApi, setShowExternalApi] = useState(false);
+
+  // Detecta qual seção está ativa baseado na rota
+  const getCurrentSection = () => {
+    const path = location.pathname;
+    if (path.startsWith('/tickets')) return 'atendimento';
+    if (path.startsWith('/kanban')) return 'crm';
+    if (path.startsWith('/dashboard') || path === '/') return 'dashboard';
+    if (path.startsWith('/reports')) return 'relatorios';
+    // Todas as outras rotas são consideradas "configurações"
+    return 'configuracoes';
+  };
+
+  const currentSection = getCurrentSection();
 
 
   const [invisible, setInvisible] = useState(true);
@@ -327,240 +342,275 @@ const MainListItems = (props) => {
 
   return (
     <div onClick={drawerClose}>
-      <Can
-        role={user.profile}
-        perform="dashboard:view"
-        yes={() => (
+      {/* SEÇÃO: ATENDIMENTO */}
+      {currentSection === 'atendimento' && (
+        <>
           <ListItemLink
-            to="/"
-            primary="Dashboard"
-            icon={<DashboardOutlinedIcon />}
+            to="/tickets"
+            primary={i18n.t("mainDrawer.listItems.tickets")}
+            icon={<WhatsAppIcon />}
           />
-        )}
-      />
+          <ListItemLink
+            to="/quick-messages"
+            primary={i18n.t("mainDrawer.listItems.quickMessages")}
+            icon={<FlashOnIcon />}
+          />
+          <ListItemLink
+            to="/todolist"
+            primary={i18n.t("mainDrawer.listItems.tasks")}
+            icon={<BorderColorIcon />}
+          />
+          <ListItemLink
+            to="/contacts"
+            primary={i18n.t("mainDrawer.listItems.contacts")}
+            icon={<ContactPhoneOutlinedIcon />}
+          />
+          <ListItemLink
+            to="/schedules"
+            primary={i18n.t("mainDrawer.listItems.schedules")}
+            icon={<EventIcon />}
+          />
+          <ListItemLink
+            to="/tags"
+            primary={i18n.t("mainDrawer.listItems.tags")}
+            icon={<LocalOfferIcon />}
+          />
+          <ListItemLink
+            to="/chats"
+            primary={i18n.t("mainDrawer.listItems.chats")}
+            icon={
+              <Badge color="secondary" variant="dot" invisible={invisible}>
+                <ForumIcon />
+              </Badge>
+            }
+          />
+        </>
+      )}
 
-      <ListItemLink
-        to="/tickets"
-        primary={i18n.t("mainDrawer.listItems.tickets")}
-        icon={<WhatsAppIcon />}
-      />
-	  
-	{showKanban && (  
-	  <ListItemLink
-        to="/kanban"
-        primary={`Kanban`}
-        icon={<TableChartIcon />}
-      />
-	  )}
+      {/* SEÇÃO: CRM (KANBAN) */}
+      {currentSection === 'crm' && showKanban && (
+        <>
+          <ListItemLink
+            to="/kanban"
+            primary="Kanban"
+            icon={<TableChartIcon />}
+          />
+          <ListItemLink
+            to="/contacts"
+            primary={i18n.t("mainDrawer.listItems.contacts")}
+            icon={<ContactPhoneOutlinedIcon />}
+          />
+          <ListItemLink
+            to="/tags"
+            primary={i18n.t("mainDrawer.listItems.tags")}
+            icon={<LocalOfferIcon />}
+          />
+        </>
+      )}
 
+      {/* SEÇÃO: DASHBOARD */}
+      {currentSection === 'dashboard' && (
+        <Can
+          role={user.profile}
+          perform="dashboard:view"
+          yes={() => (
+            <ListItemLink
+              to="/"
+              primary="Dashboard"
+              icon={<DashboardOutlinedIcon />}
+            />
+          )}
+        />
+      )}
 
-      <ListItemLink
-        to="/quick-messages"
-        primary={i18n.t("mainDrawer.listItems.quickMessages")}
-        icon={<FlashOnIcon />}
-      />
-	  
-	  <ListItemLink
-        to="/todolist"
-        primary={i18n.t("mainDrawer.listItems.tasks")}
-        icon={<BorderColorIcon />}
-      />
+      {/* SEÇÃO: RELATÓRIOS */}
+      {currentSection === 'relatorios' && (
+        <>
+          <ListSubheader
+            hidden={collapsed}
+            style={{
+              position: "relative",
+              fontSize: "17px",
+              textAlign: "left",
+              paddingLeft: 20
+            }}
+            inset
+            color="inherit">
+            Relatórios
+          </ListSubheader>
+          {/* Aqui você pode adicionar itens específicos de relatórios futuramente */}
+        </>
+      )}
 
-      <ListItemLink
-        to="/contacts"
-        primary={i18n.t("mainDrawer.listItems.contacts")}
-        icon={<ContactPhoneOutlinedIcon />}
-      />
+      {/* SEÇÃO: CONFIGURAÇÕES */}
+      {currentSection === 'configuracoes' && (
+        <Can
+          role={user.profile}
+          perform="drawer-admin-items:view"
+          yes={() => (
+            <>
+              <ListSubheader
+                hidden={collapsed}
+                style={{
+                  position: "relative",
+                  fontSize: "17px",
+                  textAlign: "left",
+                  paddingLeft: 20
+                }}
+                inset
+                color="inherit">
+                {i18n.t("mainDrawer.listItems.administration")}
+              </ListSubheader>
 
-      <ListItemLink
-        to="/schedules"
-        primary={i18n.t("mainDrawer.listItems.schedules")}
-        icon={<EventIcon />}
-      />
+              {showCampaigns && (
+                <>
+                  <ListItem
+                    button
+                    onClick={() => setOpenCampaignSubmenu((prev) => !prev)}
+                    className={classes.listItem}
+                  >
+                    <ListItemIcon className={classes.listItemIcon}>
+                      <EventAvailableIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={i18n.t("mainDrawer.listItems.campaigns")}
+                      className={classes.listItemText}
+                    />
+                    {openCampaignSubmenu ? (
+                      <ExpandLessIcon />
+                    ) : (
+                      <ExpandMoreIcon />
+                    )}
+                  </ListItem>
+                  <Collapse
+                    style={{ paddingLeft: 15 }}
+                    in={openCampaignSubmenu}
+                    timeout="auto"
+                    unmountOnExit
+                  >
+                    <List component="div" disablePadding>
+                      <ListItem onClick={() => history.push("/campaigns")} button className={classes.listItem}>
+                        <ListItemIcon className={classes.listItemIcon}>
+                          <ListIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Listagem" className={classes.listItemText} />
+                      </ListItem>
+                      <ListItem
+                        onClick={() => history.push("/contact-lists")}
+                        button
+                        className={classes.listItem}
+                      >
+                        <ListItemIcon className={classes.listItemIcon}>
+                          <PeopleIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Listas de Contatos" className={classes.listItemText} />
+                      </ListItem>
+                      <ListItem
+                        onClick={() => history.push("/campaigns-config")}
+                        button
+                        className={classes.listItem}
+                      >
+                        <ListItemIcon className={classes.listItemIcon}>
+                          <SettingsOutlinedIcon />
+                        </ListItemIcon>
+                        <ListItemText primary="Configurações" className={classes.listItemText} />
+                      </ListItem>
+                    </List>
+                  </Collapse>
+                </>
+              )}
 
-      <ListItemLink
-        to="/tags"
-        primary={i18n.t("mainDrawer.listItems.tags")}
-        icon={<LocalOfferIcon />}
-      />
+              {user.super && (
+                <ListItemLink
+                  to="/announcements"
+                  primary={i18n.t("mainDrawer.listItems.annoucements")}
+                  icon={<AnnouncementIcon />}
+                />
+              )}
 
-      <ListItemLink
-        to="/chats"
-        primary={i18n.t("mainDrawer.listItems.chats")}
-        icon={
-          <Badge color="secondary" variant="dot" invisible={invisible}>
-            <ForumIcon />
-          </Badge>
-        }
-      />
+              {showOpenAi && (
+                <ListItemLink
+                  to="/prompts"
+                  primary={i18n.t("mainDrawer.listItems.prompts")}
+                  icon={<AllInclusive />}
+                />
+              )}
 
-      <ListItemLink
-        to="/helps"
-        primary={i18n.t("mainDrawer.listItems.helps")}
-        icon={<HelpOutlineIcon />}
-      />
+              {showIntegrations && (
+                <ListItemLink
+                  to="/queue-integration"
+                  primary={i18n.t("mainDrawer.listItems.queueIntegration")}
+                  icon={<DeviceHubOutlined />}
+                />
+              )}
 
-      <Can
-        role={user.profile}
-        perform="drawer-admin-items:view"
-        yes={() => (
-          <>
-            <Divider />
-            <ListSubheader
-              hidden={collapsed}
-              style={{
-                position: "relative",
-                fontSize: "17px",
-                textAlign: "left",
-                paddingLeft: 20
-              }}
-              inset
-              color="inherit">
-              {i18n.t("mainDrawer.listItems.administration")}
-            </ListSubheader>
-			
-            {showCampaigns && (
-              <>
-                <ListItem
-                  button
-                  onClick={() => setOpenCampaignSubmenu((prev) => !prev)}
-                  className={classes.listItem}
-                >
-                  <ListItemIcon className={classes.listItemIcon}>
-                    <EventAvailableIcon />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={i18n.t("mainDrawer.listItems.campaigns")}
-                    className={classes.listItemText}
-                  />
-                  {openCampaignSubmenu ? (
-                    <ExpandLessIcon />
-                  ) : (
-                    <ExpandMoreIcon />
-                  )}
-                </ListItem>
-                <Collapse
-                  style={{ paddingLeft: 15 }}
-                  in={openCampaignSubmenu}
-                  timeout="auto"
-                  unmountOnExit
-                >
-                  <List component="div" disablePadding>
-                    <ListItem onClick={() => history.push("/campaigns")} button className={classes.listItem}>
-                      <ListItemIcon className={classes.listItemIcon}>
-                        <ListIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Listagem" className={classes.listItemText} />
-                    </ListItem>
-                    <ListItem
-                      onClick={() => history.push("/contact-lists")}
-                      button
-                      className={classes.listItem}
-                    >
-                      <ListItemIcon className={classes.listItemIcon}>
-                        <PeopleIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Listas de Contatos" className={classes.listItemText} />
-                    </ListItem>
-                    <ListItem
-                      onClick={() => history.push("/campaigns-config")}
-                      button
-                      className={classes.listItem}
-                    >
-                      <ListItemIcon className={classes.listItemIcon}>
-                        <SettingsOutlinedIcon />
-                      </ListItemIcon>
-                      <ListItemText primary="Configurações" className={classes.listItemText} />
-                    </ListItem>
-                  </List>
-                </Collapse>
-              </>
-            )}
-            {user.super && (
               <ListItemLink
-                to="/announcements"
-                primary={i18n.t("mainDrawer.listItems.annoucements")}
-                icon={<AnnouncementIcon />}
+                to="/connections"
+                primary={i18n.t("mainDrawer.listItems.connections")}
+                icon={
+                  <Badge badgeContent={connectionWarning ? "!" : 0} color="error">
+                    <SyncAltIcon />
+                  </Badge>
+                }
               />
-            )}
-            {showOpenAi && (
-              <ListItemLink
-                to="/prompts"
-                primary={i18n.t("mainDrawer.listItems.prompts")}
-                icon={<AllInclusive />}
-              />
-            )}
 
-            {showIntegrations && (
               <ListItemLink
-                to="/queue-integration"
-                primary={i18n.t("mainDrawer.listItems.queueIntegration")}
-                icon={<DeviceHubOutlined />}
+                to="/files"
+                primary={i18n.t("mainDrawer.listItems.files")}
+                icon={<AttachFileOutlined />}
               />
-            )}
-            <ListItemLink
-              to="/connections"
-              primary={i18n.t("mainDrawer.listItems.connections")}
-              icon={
-                <Badge badgeContent={connectionWarning ? "!" : 0} color="error">
-                  <SyncAltIcon />
-                </Badge>
-              }
-            />
-            <ListItemLink
-              to="/files"
-              primary={i18n.t("mainDrawer.listItems.files")}
-              icon={<AttachFileOutlined />}
-            />
-            <ListItemLink
-              to="/queues"
-              primary={i18n.t("mainDrawer.listItems.queues")}
-              icon={<AccountTreeOutlinedIcon />}
-            />
-            <ListItemLink
-              to="/users"
-              primary={i18n.t("mainDrawer.listItems.users")}
-              icon={<PeopleAltOutlinedIcon />}
-            />
-            {showExternalApi && (
-              <>
+
+              <ListItemLink
+                to="/queues"
+                primary={i18n.t("mainDrawer.listItems.queues")}
+                icon={<AccountTreeOutlinedIcon />}
+              />
+
+              <ListItemLink
+                to="/users"
+                primary={i18n.t("mainDrawer.listItems.users")}
+                icon={<PeopleAltOutlinedIcon />}
+              />
+
+              {showExternalApi && (
                 <ListItemLink
                   to="/messages-api"
                   primary={i18n.t("mainDrawer.listItems.messagesAPI")}
                   icon={<CodeRoundedIcon />}
                 />
-              </>
-            )}
-            <ListItemLink
-              to="/financeiro"
-              primary={i18n.t("mainDrawer.listItems.financeiro")}
-              icon={<LocalAtmIcon />}
-            />
+              )}
 
-            <ListItemLink
-              to="/settings"
-              primary={i18n.t("mainDrawer.listItems.settings")}
-              icon={<SettingsOutlinedIcon />}
-            />
-			
-			
-            {!collapsed && <React.Fragment>
-              <Divider />
-              {/* 
-              // IMAGEM NO MENU
-              <Hidden only={['sm', 'xs']}>
-                <img style={{ width: "100%", padding: "10px" }} src={logo} alt="image" />            
-              </Hidden> 
-              */}
-              <Typography style={{ fontSize: "12px", padding: "10px", textAlign: "right", fontWeight: "bold" }}>
-                {version}
-              </Typography>
-            </React.Fragment>
-            }
-			
-          </>
-        )}
-      />
+              <ListItemLink
+                to="/financeiro"
+                primary={i18n.t("mainDrawer.listItems.financeiro")}
+                icon={<LocalAtmIcon />}
+              />
+
+              <ListItemLink
+                to="/settings"
+                primary={i18n.t("mainDrawer.listItems.settings")}
+                icon={<SettingsOutlinedIcon />}
+              />
+
+              <ListItemLink
+                to="/helps"
+                primary={i18n.t("mainDrawer.listItems.helps")}
+                icon={<HelpOutlineIcon />}
+              />
+            </>
+          )}
+        />
+      )}
+
+      {/* Rodapé com versão */}
+      {!collapsed && (
+        <React.Fragment>
+          <Divider />
+          <Typography style={{ fontSize: "12px", padding: "10px", textAlign: "right", fontWeight: "bold" }}>
+            {version}
+          </Typography>
+        </React.Fragment>
+      )}
     </div>
   );
 };
