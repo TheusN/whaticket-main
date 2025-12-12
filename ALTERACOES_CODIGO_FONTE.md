@@ -1,7 +1,7 @@
 # Documento de Alterações no Código Fonte - OmniWhats (Whaticket)
 
-**Data:** 11/12/2025
-**Versão:** 6.0.0
+**Data:** 12/12/2025
+**Versão:** 7.0.0
 **Repositório:** https://github.com/TheusN/whaticket-main
 
 ---

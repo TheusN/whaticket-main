@@ -72,4 +72,7 @@ whitelabelRoutes.post(
 
 whitelabelRoutes.delete("/whitelabel/image/:field", isAuth, WhitelabelController.deleteImage);
 
+// Rota para restaurar configurações padrão
+whitelabelRoutes.post("/whitelabel/restore-defaults", isAuth, WhitelabelController.restoreDefaults);
+
 export default whitelabelRoutes;

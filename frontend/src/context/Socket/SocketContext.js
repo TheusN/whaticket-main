@@ -2,6 +2,25 @@ import { createContext } from "react";
 import openSocket from "socket.io-client";
 import jwt from "jsonwebtoken";
 
+// Helper para obter URL base do backend (mesma lógica do api.js)
+const getBackendUrl = () => {
+  if (window.RUNTIME_CONFIG?.BACKEND_URL) {
+    return window.RUNTIME_CONFIG.BACKEND_URL;
+  }
+  if (process.env.REACT_APP_BACKEND_URL) {
+    return process.env.REACT_APP_BACKEND_URL;
+  }
+  const hostname = window.location.hostname;
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return "http://localhost:8080";
+  }
+  const protocol = window.location.protocol;
+  if (hostname.startsWith("atende") && !hostname.startsWith("atendeapi")) {
+    return `${protocol}//atendeapi.${hostname.split('.').slice(1).join('.')}`;
+  }
+  return `${protocol}//api.${hostname}`;
+};
+
 class ManagedSocket {
   constructor(socketManager) {
     this.socketManager = socketManager;
@@ -113,7 +132,7 @@ const SocketManager = {
         return new DummySocket();
       }
       
-      this.currentSocket = openSocket(process.env.REACT_APP_BACKEND_URL, {
+      this.currentSocket = openSocket(getBackendUrl(), {
         transports: ["websocket"],
         pingTimeout: 18000,
         pingInterval: 18000,

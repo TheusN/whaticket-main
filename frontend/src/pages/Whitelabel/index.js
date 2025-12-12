@@ -21,7 +21,8 @@ import {
   Palette as PaletteIcon,
   Image as ImageIcon,
   Save as SaveIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
+  RestoreOutlined as RestoreIcon
 } from "@material-ui/icons";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -33,6 +34,7 @@ import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper"
 import Title from "../../components/Title";
 import ButtonWithSpinner from "../../components/ButtonWithSpinner";
 import useWhitelabel from "../../hooks/useWhitelabel";
+import { useWhitelabelContext } from "../../context/Whitelabel/WhitelabelContext";
 import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
@@ -139,21 +141,25 @@ const WhitelabelSchema = Yup.object().shape({
   ),
 });
 
+// Valores padrão originais do sistema
+const DEFAULT_VALUES = {
+  companyName: "Atendechat",
+  primaryColorLight: "#8B5CF6",
+  secondaryColorLight: "#F3F4F6",
+  backgroundColorLight: "#FFFFFF",
+  textColorLight: "#1F2937",
+  primaryColorDark: "#8B5CF6",
+  secondaryColorDark: "#1F2937",
+  backgroundColorDark: "#111827",
+  textColorDark: "#F9FAFB",
+};
+
 const Whitelabel = () => {
   const classes = useStyles();
-  const { whitelabel, loading, fetchWhitelabel, createWhitelabel, updateWhitelabel, uploadImage, deleteImage } = useWhitelabel();
+  const { whitelabel, loading, fetchWhitelabel, createWhitelabel, updateWhitelabel, uploadImage, deleteImage, restoreDefaults } = useWhitelabel();
+  const { fetchWhitelabel: refreshGlobalWhitelabel, getImageUrl } = useWhitelabelContext();
 
-  const [initialValues, setInitialValues] = useState({
-    companyName: "",
-    primaryColorLight: "#8B5CF6",
-    secondaryColorLight: "#F3F4F6",
-    backgroundColorLight: "#FFFFFF",
-    textColorLight: "#1F2937",
-    primaryColorDark: "#8B5CF6",
-    secondaryColorDark: "#1F2937",
-    backgroundColorDark: "#111827",
-    textColorDark: "#F9FAFB",
-  });
+  const [initialValues, setInitialValues] = useState(DEFAULT_VALUES);
 
   useEffect(() => {
     if (whitelabel) {
@@ -189,11 +195,15 @@ const Whitelabel = () => {
     }
 
     await uploadImage(field, file);
+    // Atualiza o contexto global para aplicar as mudanças no tema
+    await refreshGlobalWhitelabel();
   };
 
   const handleDeleteImage = async (field) => {
     if (window.confirm(`Deseja realmente remover esta imagem?`)) {
       await deleteImage(field);
+      // Atualiza o contexto global para aplicar as mudanças no tema
+      await refreshGlobalWhitelabel();
     }
   };
 
@@ -204,8 +214,30 @@ const Whitelabel = () => {
       } else {
         await createWhitelabel(values);
       }
+      // Atualiza o contexto global para aplicar as mudanças no tema
+      await refreshGlobalWhitelabel();
     } catch (error) {
       console.error("Error saving whitelabel:", error);
+    }
+  };
+
+  // Restaurar todas as configurações para o padrão original
+  const handleRestoreDefaults = async () => {
+    if (!window.confirm("Deseja restaurar TODAS as configurações para o padrão original?\n\nIsso irá:\n- Restaurar todas as cores\n- Restaurar as logos padrão\n- Restaurar o nome da empresa\n\nEsta ação não pode ser desfeita!")) {
+      return;
+    }
+
+    try {
+      // Chama a API para restaurar padrões (backend cuida de tudo)
+      await restoreDefaults();
+
+      // Atualiza o contexto global
+      await refreshGlobalWhitelabel();
+
+      // Recarrega os dados locais
+      await fetchWhitelabel();
+    } catch (error) {
+      console.error("Error restoring defaults:", error);
     }
   };
 
@@ -216,7 +248,7 @@ const Whitelabel = () => {
           <>
             <CardMedia
               component="img"
-              image={`${process.env.REACT_APP_BACKEND_URL}${currentImage}`}
+              image={getImageUrl(currentImage)}
               alt={label}
               className={classes.imagePreview}
             />
@@ -262,6 +294,15 @@ const Whitelabel = () => {
       <MainHeader>
         <Title>🎨 WhiteLabel - Personalização</Title>
         <MainHeaderButtonsWrapper>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={handleRestoreDefaults}
+            startIcon={<RestoreIcon />}
+            style={{ marginRight: 8 }}
+          >
+            Restaurar Padrão
+          </Button>
           <Button
             variant="outlined"
             color="primary"

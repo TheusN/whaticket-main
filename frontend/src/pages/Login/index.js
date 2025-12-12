@@ -94,18 +94,18 @@ const Login = () => {
 	const [menuLanguageOpen, setMenuLanguageOpen] = useState(false);
 
 	const { handleLogin } = useContext(AuthContext);
-	const { whitelabel } = useWhitelabelContext();
+	const { whitelabel, getImageUrl } = useWhitelabelContext();
 
 	// Usar logo do whitelabel (loginLogo ou logoLight) ou padrão
 	const loginLogo = React.useMemo(() => {
 		if (whitelabel?.loginLogo) {
-			return `${process.env.REACT_APP_BACKEND_URL}${whitelabel.loginLogo}`;
+			return getImageUrl(whitelabel.loginLogo);
 		}
 		if (whitelabel?.logoLight) {
-			return `${process.env.REACT_APP_BACKEND_URL}${whitelabel.logoLight}`;
+			return getImageUrl(whitelabel.logoLight);
 		}
 		return logoDefault;
-	}, [whitelabel]);
+	}, [whitelabel, getImageUrl]);
 
 	const handleChangeInput = e => {
 		setUser({ ...user, [e.target.name]: e.target.value });

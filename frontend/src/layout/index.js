@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import clsx from "clsx";
 import {
@@ -12,12 +12,15 @@ import {
   IconButton,
   Menu,
   useTheme,
+  Typography,
+  Box,
 } from "@material-ui/core";
 
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import CachedIcon from "@material-ui/icons/Cached";
+import useVersion from "../hooks/useVersion";
 
 import MainListItems from "./MainListItems";
 import NotificationsPopOver from "../components/NotificationsPopOver";
@@ -133,6 +136,29 @@ const useStyles = makeStyles((theme) => ({
       width: "100%"
     }
   },
+  drawerContainer: {
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+  },
+  drawerContent: {
+    flex: 1,
+    overflowY: "auto",
+    overflowX: "hidden",
+    ...theme.scrollbarStylesSoft,
+  },
+  drawerFooter: {
+    padding: theme.spacing(1, 2),
+    borderTop: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.paper,
+    textAlign: "center",
+  },
+  versionText: {
+    fontSize: "11px",
+    color: theme.palette.text.secondary,
+    fontWeight: 500,
+    opacity: 0.8,
+  },
   content: {
     flex: 1,
     overflow: "auto",
@@ -184,8 +210,10 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   const { handleLogout, loading } = useContext(AuthContext);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerVariant, setDrawerVariant] = useState("permanent");
-  // const [dueDate, setDueDate] = useState("");
+  const [version, setVersion] = useState("");
   const { user } = useContext(AuthContext);
+  const { getVersion } = useVersion();
+  const isMountedRef = useRef(true);
 
   const theme = useTheme();
   const { colorMode } = useContext(ColorModeContext);
@@ -257,6 +285,28 @@ const LoggedInLayout = ({ children, themeToggle }) => {
   //##############################################################################
 
   const socketManager = useContext(SocketContext);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    async function fetchVersion() {
+      try {
+        const _version = await getVersion();
+        if (isMountedRef.current) {
+          setVersion(_version.version);
+        }
+      } catch (err) {
+        // Silently fail - version is optional
+      }
+    }
+    fetchVersion();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (document.body.offsetWidth > 1200) {
@@ -511,13 +561,22 @@ const LoggedInLayout = ({ children, themeToggle }) => {
             role="navigation"
             aria-label="Menu de navegação principal"
           >
-            <List
-              className={classes.containerWithScroll}
-              component="nav"
-              aria-label="Menu principal de navegação"
-            >
-              <MainListItems drawerClose={drawerClose} collapsed={!drawerOpen} />
-            </List>
+            <div className={classes.drawerContainer}>
+              <List
+                className={classes.drawerContent}
+                component="nav"
+                aria-label="Menu principal de navegação"
+              >
+                <MainListItems drawerClose={drawerClose} collapsed={!drawerOpen} />
+              </List>
+              {drawerOpen && version && (
+                <Box className={classes.drawerFooter}>
+                  <Typography className={classes.versionText}>
+                    v{version}
+                  </Typography>
+                </Box>
+              )}
+            </div>
           </Drawer>
         )}
 

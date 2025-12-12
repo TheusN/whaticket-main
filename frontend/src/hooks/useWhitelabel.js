@@ -98,6 +98,21 @@ const useWhitelabel = () => {
     }
   };
 
+  const restoreDefaults = async () => {
+    setLoading(true);
+    try {
+      const response = await api.post("/whitelabel/restore-defaults");
+      setWhitelabel(response.data.whitelabel);
+      toast.success("Configurações restauradas para o padrão original!");
+      return response.data;
+    } catch (error) {
+      toast.error(error?.response?.data?.error || "Erro ao restaurar configurações");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     whitelabel,
     loading,
@@ -105,7 +120,8 @@ const useWhitelabel = () => {
     createWhitelabel,
     updateWhitelabel,
     uploadImage,
-    deleteImage
+    deleteImage,
+    restoreDefaults
   };
 };
 

@@ -89,7 +89,7 @@ async function handleSendMessage(job) {
     await SendMessage(whatsapp, messageData);
   } catch (e: any) {
     Sentry.captureException(e);
-    logger.error("MessageQueue -> SendMessage: error", e.message);
+    logger.error(`MessageQueue -> SendMessage: error ${e.message}`);
     throw e;
   }
 }
@@ -208,7 +208,7 @@ async function handleCloseTicketsAutomatic() {
         await ClosedAllOpenTickets(companyId);
       } catch (e: any) {
         Sentry.captureException(e);
-        logger.error("ClosedAllOpenTickets -> Verify: error", e.message);
+        logger.error(`ClosedAllOpenTickets -> Verify: error ${e.message}`);
         throw e;
       }
 
@@ -245,7 +245,7 @@ async function handleVerifySchedules(job) {
     }
   } catch (e: any) {
     Sentry.captureException(e);
-    logger.error("SendScheduledMessage -> Verify: error", e.message);
+    logger.error(`SendScheduledMessage -> Verify: error ${e.message}`);
     throw e;
   }
 }
@@ -289,7 +289,7 @@ async function handleSendScheduledMessage(job) {
     await scheduleRecord?.update({
       status: "ERRO"
     });
-    logger.error("SendScheduledMessage -> SendMessage: error", e.message);
+    logger.error(`SendScheduledMessage -> SendMessage: error ${e.message}`);
     throw e;
   }
 }
@@ -694,7 +694,7 @@ async function handleDispatchCampaign(job) {
           logger.info("[🚩] - Enviou arquivo: "+ file.name +" | CampaignShippingId: " + campaignShippingId + " CampanhaID: " + campaignId);
         };
       } catch (error) {
-        logger.info(error);
+        logger.info(`Error: ${error}`);
       }
     }
 
@@ -874,7 +874,7 @@ export async function startQueueProcess() {
         }
       }
     } catch (error) {
-      logger.error('[🚨] - Erro na limpeza da fila de campanhas:', error);
+      logger.error(`[🚨] - Erro na limpeza da fila de campanhas: ${error}`);
     }
   }
   setInterval(cleanupCampaignQueue, 6 * 3600 * 1000);
@@ -883,13 +883,7 @@ export async function startQueueProcess() {
     const jobCounts = await campaignQueue.getJobCounts();
     const memoryUsage = process.memoryUsage();
     
-    logger.info('[📌] - Status da fila de campanhas:', {
-      jobs: jobCounts,
-      memory: {
-        heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024) + 'MB',
-        heapTotal: Math.round(memoryUsage.heapTotal / 1024 / 1024) + 'MB'
-      }
-    });
+    logger.info(`[📌] - Status da fila de campanhas: jobs=${JSON.stringify(jobCounts)}, heapUsed=${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB, heapTotal=${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB`);
   }, 5 * 60 * 1000);
 
   campaignQueue.on('completed', (job) => {

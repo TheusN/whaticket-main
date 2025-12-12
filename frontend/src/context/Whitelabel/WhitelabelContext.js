@@ -1,7 +1,26 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import api from "../../services/api";
+import { openApi } from "../../services/api";
 
 const WhitelabelContext = createContext();
+
+// Helper para obter URL base do backend (mesma lógica do api.js)
+const getBackendUrl = () => {
+  if (window.RUNTIME_CONFIG?.BACKEND_URL) {
+    return window.RUNTIME_CONFIG.BACKEND_URL;
+  }
+  if (process.env.REACT_APP_BACKEND_URL) {
+    return process.env.REACT_APP_BACKEND_URL;
+  }
+  const hostname = window.location.hostname;
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return "http://localhost:8080";
+  }
+  const protocol = window.location.protocol;
+  if (hostname.startsWith("atende") && !hostname.startsWith("atendeapi")) {
+    return `${protocol}//atendeapi.${hostname.split('.').slice(1).join('.')}`;
+  }
+  return `${protocol}//api.${hostname}`;
+};
 
 const defaultWhitelabel = {
   companyName: "Atendechat",
@@ -31,14 +50,14 @@ export const WhitelabelProvider = ({ children }) => {
   const fetchWhitelabel = async () => {
     setLoading(true);
     try {
-      // Usa rota pública que não precisa de autenticação
-      const { data } = await api.get("/whitelabel/public");
+      // Usa rota pública que não precisa de autenticação (openApi não tem interceptors)
+      const { data } = await openApi.get("/whitelabel/public");
       if (data) {
         setWhitelabel({ ...defaultWhitelabel, ...data });
 
         // Atualiza favicon se existir
         if (data.favicon) {
-          updateFavicon(`${process.env.REACT_APP_BACKEND_URL}${data.favicon}`);
+          updateFavicon(`${getBackendUrl()}${data.favicon}`);
         }
 
         // Atualiza title se existir
@@ -73,9 +92,15 @@ export const WhitelabelProvider = ({ children }) => {
   const getLogo = (mode) => {
     const logo = mode === "light" ? whitelabel.logoLight : whitelabel.logoDark;
     if (logo) {
-      return `${process.env.REACT_APP_BACKEND_URL}${logo}`;
+      return `${getBackendUrl()}${logo}`;
     }
     return null;
+  };
+
+  // Função para obter URL completa de qualquer imagem do whitelabel
+  const getImageUrl = (path) => {
+    if (!path) return null;
+    return `${getBackendUrl()}${path}`;
   };
 
   return (
@@ -86,6 +111,8 @@ export const WhitelabelProvider = ({ children }) => {
         fetchWhitelabel,
         getColors,
         getLogo,
+        getImageUrl,
+        getBackendUrl,
       }}
     >
       {children}

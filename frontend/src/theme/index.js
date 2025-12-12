@@ -37,12 +37,33 @@ export const getDesignTokens = (mode, whitelabelColors = null) => {
   // Usar cores do whitelabel se disponíveis, senão usar padrão
   const colors = whitelabelColors || defaultColors;
 
+  // Cor primária (já funcionava)
   const primaryMain = mode === "light"
     ? (colors.primaryColorLight || defaultColors.primaryColorLight)
     : (colors.primaryColorDark || defaultColors.primaryColorDark);
-
   const primaryLight = adjustColor(primaryMain, 20);
   const primaryDark = adjustColor(primaryMain, -20);
+
+  // Cor secundária (nova)
+  const secondaryMain = mode === "light"
+    ? (colors.secondaryColorLight || defaultColors.secondaryColorLight)
+    : (colors.secondaryColorDark || defaultColors.secondaryColorDark);
+  const secondaryLight = adjustColor(secondaryMain, 20);
+  const secondaryDark = adjustColor(secondaryMain, -20);
+
+  // Cor de fundo (nova)
+  const backgroundColor = mode === "light"
+    ? (colors.backgroundColorLight || defaultColors.backgroundColorLight)
+    : (colors.backgroundColorDark || defaultColors.backgroundColorDark);
+  const backgroundPaper = mode === "light"
+    ? adjustColor(backgroundColor, -3)  // Levemente mais escuro para paper
+    : adjustColor(backgroundColor, 10); // Levemente mais claro para paper no dark
+
+  // Cor de texto (nova)
+  const textPrimary = mode === "light"
+    ? (colors.textColorLight || defaultColors.textColorLight)
+    : (colors.textColorDark || defaultColors.textColorDark);
+  const textSecondary = adjustColor(textPrimary, mode === "light" ? 40 : -30);
 
   return ({
     // Typography - Poppins universal
@@ -180,11 +201,12 @@ export const getDesignTokens = (mode, whitelabelColors = null) => {
             contrastText: "#FFFFFF",
         },
 
-        // Secondary - Verde
+        // Secondary - Cor dinâmica do whitelabel
         secondary: {
-            main: "#10B981",
-            light: "#34D399",
-            dark: "#059669",
+            main: secondaryMain,
+            light: secondaryLight,
+            dark: secondaryDark,
+            contrastText: mode === "light" ? "#FFFFFF" : "#000000",
         },
 
         // Error
@@ -215,61 +237,61 @@ export const getDesignTokens = (mode, whitelabelColors = null) => {
             dark: "#059669",
         },
 
-        // Background
+        // Background - Cor dinâmica do whitelabel
         background: {
-            default: mode === "light" ? "#FAFAFA" : "#000000", // OLED TRUE BLACK
-            paper: mode === "light" ? "#FFFFFF" : "#0A0A0A", // OLED surface1
+            default: backgroundColor,
+            paper: backgroundPaper,
         },
 
-        // Text
+        // Text - Cor dinâmica do whitelabel
         text: {
-            primary: mode === "light" ? "#171717" : "#FAFAFA",
-            secondary: mode === "light" ? "#737373" : "#A3A3A3",
-            disabled: mode === "light" ? "#D4D4D4" : "#525252",
+            primary: textPrimary,
+            secondary: textSecondary,
+            disabled: adjustColor(textPrimary, mode === "light" ? 60 : -50),
         },
 
         // Divider
         divider: mode === "light" ? "#E5E5E5" : "#1A1A1A",
 
-        // Custom colors (compatibilidade)
-        textPrimary: mode === "light" ? primaryMain : "#FAFAFA",
-        borderPrimary: mode === "light" ? primaryMain : "#FAFAFA",
-        dark: { main: mode === "light" ? "#171717" : "#FAFAFA" },
-        light: { main: mode === "light" ? "#FAFAFA" : "#171717" },
+        // Custom colors (compatibilidade) - usando cores dinâmicas
+        textPrimary: mode === "light" ? primaryMain : textPrimary,
+        borderPrimary: mode === "light" ? primaryMain : textPrimary,
+        dark: { main: textPrimary },
+        light: { main: backgroundColor },
 
-        // Surfaces (OLED)
-        surface1: mode === "light" ? "#FFFFFF" : "#0A0A0A",
-        surface2: mode === "light" ? "#FFFFFF" : "#141414",
-        surface3: mode === "light" ? "#FFFFFF" : "#1F1F1F",
+        // Surfaces - baseadas na cor de fundo do whitelabel
+        surface1: backgroundPaper,
+        surface2: mode === "light" ? adjustColor(backgroundColor, -5) : adjustColor(backgroundColor, 15),
+        surface3: mode === "light" ? adjustColor(backgroundColor, -8) : adjustColor(backgroundColor, 20),
 
-        // Borders
-        border: mode === "light" ? "#E5E5E5" : "#262626",
+        // Borders - baseadas na cor de texto
+        border: adjustColor(textPrimary, mode === "light" ? 70 : -60),
 
-        // Legacy colors (manter compatibilidade)
-        tabHeaderBackground: mode === "light" ? "#F5F5F5" : "#0A0A0A",
-        optionsBackground: mode === "light" ? "#FAFAFA" : "#0A0A0A",
-        options: mode === "light" ? "#FAFAFA" : "#141414",
-        fontecor: mode === "light" ? "#10B981" : "#FAFAFA",
-        fancyBackground: mode === "light" ? "#FAFAFA" : "#000000",
-        bordabox: mode === "light" ? "#E5E5E5" : "#262626",
-        newmessagebox: mode === "light" ? "#F5F5F5" : "#141414",
-        inputdigita: mode === "light" ? "#FFFFFF" : "#141414",
-        contactdrawer: mode === "light" ? "#FFFFFF" : "#0A0A0A",
-        announcements: mode === "light" ? "#F5F5F5" : "#141414",
-        login: mode === "light" ? "#FFFFFF" : "#000000",
-        announcementspopover: mode === "light" ? "#FFFFFF" : "#0A0A0A",
-        chatlist: mode === "light" ? "#F5F5F5" : "#0A0A0A",
-        boxlist: mode === "light" ? "#F5F5F5" : "#141414",
-        boxchatlist: mode === "light" ? "#F5F5F5" : "#0A0A0A",
-        total: mode === "light" ? "#FFFFFF" : "#0A0A0A",
-        messageIcons: mode === "light" ? "#737373" : "#A3A3A3",
-        inputBackground: mode === "light" ? "#FFFFFF" : "#141414",
+        // Legacy colors (manter compatibilidade) - usando cores dinâmicas
+        tabHeaderBackground: mode === "light" ? adjustColor(backgroundColor, -3) : adjustColor(backgroundColor, 8),
+        optionsBackground: backgroundColor,
+        options: backgroundPaper,
+        fontecor: secondaryMain,
+        fancyBackground: backgroundColor,
+        bordabox: adjustColor(textPrimary, mode === "light" ? 70 : -60),
+        newmessagebox: mode === "light" ? adjustColor(backgroundColor, -3) : adjustColor(backgroundColor, 12),
+        inputdigita: backgroundPaper,
+        contactdrawer: backgroundPaper,
+        announcements: mode === "light" ? adjustColor(backgroundColor, -3) : adjustColor(backgroundColor, 12),
+        login: backgroundColor,
+        announcementspopover: backgroundPaper,
+        chatlist: mode === "light" ? adjustColor(backgroundColor, -3) : adjustColor(backgroundColor, 8),
+        boxlist: mode === "light" ? adjustColor(backgroundColor, -3) : adjustColor(backgroundColor, 12),
+        boxchatlist: mode === "light" ? adjustColor(backgroundColor, -3) : adjustColor(backgroundColor, 8),
+        total: backgroundPaper,
+        messageIcons: textSecondary,
+        inputBackground: backgroundPaper,
         barraSuperior: mode === "light"
             ? `linear-gradient(135deg, ${primaryMain} 0%, ${adjustColor(primaryMain, -10)} 100%)`
-            : "#0A0A0A",
-        boxticket: mode === "light" ? "#F5F5F5" : "#141414",
-        campaigntab: mode === "light" ? "#F5F5F5" : "#141414",
-        mediainput: mode === "light" ? "#F5F5F5" : "#000000",
+            : adjustColor(backgroundColor, 8),
+        boxticket: mode === "light" ? adjustColor(backgroundColor, -3) : adjustColor(backgroundColor, 12),
+        campaigntab: mode === "light" ? adjustColor(backgroundColor, -3) : adjustColor(backgroundColor, 12),
+        mediainput: mode === "light" ? adjustColor(backgroundColor, -3) : backgroundColor,
 
         // WhatsApp colors (manter)
         whatsapp: {

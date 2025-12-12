@@ -74,7 +74,7 @@ const typebotListener = async ({
             return request.data;
 
         } catch (err) {
-            logger.info("Erro ao criar sessão do typebot: ", err)
+            logger.info(`Erro ao criar sessão do typebot: ${err}`)
             throw err;
         }
     }
@@ -402,7 +402,7 @@ const typebotListener = async ({
             return;
         }
     } catch (error) {
-        logger.info("Error on typebotListener: ", error);
+        logger.info(`Error on typebotListener: ${error}`);
         await ticket.update({
             typebotSessionId: null
         })

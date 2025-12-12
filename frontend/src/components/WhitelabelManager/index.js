@@ -25,6 +25,7 @@ import { toast } from "react-toastify";
 
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import useWhitelabel from "../../hooks/useWhitelabel";
+import { useWhitelabelContext } from "../../context/Whitelabel/WhitelabelContext";
 
 const useStyles = makeStyles((theme) => ({
   section: {
@@ -122,6 +123,7 @@ const WhitelabelSchema = Yup.object().shape({
 const WhitelabelManager = () => {
   const classes = useStyles();
   const { whitelabel, loading, fetchWhitelabel, createWhitelabel, updateWhitelabel, uploadImage, deleteImage } = useWhitelabel();
+  const { fetchWhitelabel: refreshGlobalWhitelabel, getImageUrl } = useWhitelabelContext();
 
   const [initialValues, setInitialValues] = useState({
     companyName: "",
@@ -167,11 +169,13 @@ const WhitelabelManager = () => {
     }
 
     await uploadImage(field, file);
+    await refreshGlobalWhitelabel();
   };
 
   const handleDeleteImage = async (field) => {
     if (window.confirm(`Deseja realmente remover esta imagem?`)) {
       await deleteImage(field);
+      await refreshGlobalWhitelabel();
     }
   };
 
@@ -182,6 +186,7 @@ const WhitelabelManager = () => {
       } else {
         await createWhitelabel(values);
       }
+      await refreshGlobalWhitelabel();
     } catch (error) {
       console.error("Error saving whitelabel:", error);
     }
@@ -194,7 +199,7 @@ const WhitelabelManager = () => {
           <>
             <CardMedia
               component="img"
-              image={`${process.env.REACT_APP_BACKEND_URL}${currentImage}`}
+              image={getImageUrl(currentImage)}
               alt={label}
               className={classes.imagePreview}
             />
