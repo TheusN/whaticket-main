@@ -25,6 +25,8 @@
 			// See https://github.com/facebook/react/issues/20829#issuecomment-802088260
 			if (!crossOriginIsolated) SharedArrayBuffer = ArrayBuffer;
 		</script>
+		<!-- Runtime config - carrega ANTES do React para configuração dinâmica -->
+		<script src="%PUBLIC_URL%/config.js"></script>
 	</head>
 	<body>
 		<noscript>You need to enable JavaScript to run this app.</noscript>
